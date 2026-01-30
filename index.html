@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哆啦A夢波爾圖夢幻探險</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Nunito:wght@700;900&family=Noto+Sans+TC:wght@500;700;900&display=swap');
+        
+        :root {
+            --dora-blue: #009BDE;
+            --dora-red: #E4002B;
+            --dora-yellow: #FFD700;
+            --dora-white: #FFFFFF;
+            --text-dark: #1e3a8a;
+        }
+
+        body { 
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif; 
+            background-color: #f0f9ff;
+            color: var(--text-dark);
+            font-size: 18px; 
+            margin: 0;
+        }
+
+        h1, h2, h3 { font-family: 'ZCOOL+KuaiLe', 'Noto Sans TC', sans-serif; font-weight: 900; }
+        p, span, div, li { font-size: 1.1rem; }
+
+        /* 哆啦A夢裝飾元素 */
+        .real-bell {
+            width: 45px; height: 45px;
+            background: radial-gradient(circle at 30% 30%, #fff000, #d4af37);
+            border: 3px solid #8b4513; border-radius: 50%;
+            position: relative; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .real-bell-hole {
+            width: 10px; height: 10px; background: #8b4513; border-radius: 50%;
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+        }
+
+        .itinerary-card {
+            background: white; border-radius: 2.5rem;
+            border: 5px solid var(--dora-blue);
+            box-shadow: 0 15px 0px rgba(0, 155, 222, 0.15);
+            overflow: hidden; margin-bottom: 2rem;
+        }
+
+        /* 門票感按鈕 */
+        .btn-action {
+            background: var(--dora-red); color: white;
+            padding: 1rem 2rem; border-radius: 1.5rem;
+            font-weight: 900; border-bottom: 6px solid #b91c1c;
+            transition: all 0.1s; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-action:active { transform: translateY(3px); border-bottom-width: 2px; }
+
+        .btn-play {
+            background: var(--dora-blue); color: white;
+            width: 50px; height: 50px; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 0 #0077aa; cursor: pointer;
+        }
+
+        .nav-active { color: var(--dora-red); transform: scale(1.1); }
+        
+        /* 捲軸美化 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: var(--dora-blue); border-radius: 10px; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- 主頁面 -->
+    <div id="app-content">
+        <header class="p-6 bg-blue-500 text-white sticky top-0 z-50 flex justify-between items-center border-b-8 border-white shadow-xl">
+            <div class="flex items-center gap-4">
+                <div class="real-bell">
+                    <div class="real-bell-hole"></div>
+                </div>
+                <div>
+                    <h1 class="text-3xl leading-none">波爾圖時光冒險</h1>
+                    <p class="text-xs font-black opacity-80 mt-1 uppercase tracking-wider">Porto, Portugal 🇵🇹</p>
+                </div>
+            </div>
+            <div class="w-12 h-12 bg-white rounded-full p-1 border-2 border-blue-200">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Dora" alt="Dora" class="w-full h-full">
+            </div>
+        </header>
+
+        <main class="max-w-md mx-auto p-5 pb-20">
+            <!-- 行程分頁 -->
+            <section id="section-itinerary" class="space-y-8">
+                <div class="flex items-center justify-between px-2">
+                    <h2 class="text-3xl text-blue-600 flex items-center gap-2">
+                        <i data-lucide="map-map" class="w-8 h-8"></i> 探險路線
+                    </h2>
+                    <select id="day-selector" onchange="updateDayView()" class="bg-white border-4 border-blue-500 rounded-2xl px-4 py-2 text-xl font-black text-blue-600 shadow-sm outline-none"></select>
+                </div>
+                <div id="itinerary-list" class="space-y-12"></div>
+            </section>
+
+            <!-- 道具箱分頁 -->
+            <section id="section-toolkit" class="hidden space-y-10">
+                <h2 class="text-3xl text-blue-600 flex items-center gap-2 px-2">
+                    <i data-lucide="backpack" class="w-8 h-8"></i> 探險備忘錄
+                </h2>
+                
+                <!-- 自助必備：交通卡說明 -->
+                <div class="itinerary-card p-8 border-yellow-400 bg-yellow-50">
+                    <h3 class="text-2xl text-yellow-700 flex items-center gap-2 mb-4">
+                        <i data-lucide="train" class="w-8 h-8"></i> 交通魔法：Andante 卡
+                    </h3>
+                    <ul class="space-y-2 text-yellow-900 font-bold">
+                        <li>• 在機場地鐵站買 Andante 藍卡 (0.6€)</li>
+                        <li>• 儲值 Z4 區間可以從機場到市區</li>
+                        <li>• <span class="text-red-600 underline">重要：</span>進站前一定要感應機台！</li>
+                    </ul>
+                </div>
+
+                <!-- 翻譯機 -->
+                <div class="itinerary-card p-8">
+                    <h3 class="text-2xl text-blue-600 flex items-center gap-2 mb-6">
+                        <i data-lucide="mic-2" class="w-8 h-8"></i> 葡語翻譯機
+                    </h3>
+                    <div id="phrases-list" class="space-y-6"></div>
+                </div>
+
+                <!-- 檢查清單 -->
+                <div class="itinerary-card p-8 border-green-400 bg-green-50">
+                    <h3 class="text-2xl text-green-700 flex items-center gap-2 mb-4">
+                        <i data-lucide="check-square" class="w-8 h-8"></i> 行李百寶袋清單
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 font-bold text-green-800">
+                        <label class="flex items-center gap-2"><input type="checkbox" checked> 萬用轉接頭</label>
+                        <label class="flex items-center gap-2"><input type="checkbox"> 歐洲網卡</label>
+                        <label class="flex items-center gap-2"><input type="checkbox"> 運動鞋(石板路多)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox"> 雨傘/輕便雨衣</label>
+                        <label class="flex items-center gap-2"><input type="checkbox"> 護照影本</label>
+                        <label class="flex items-center gap-2"><input type="checkbox"> 備用電池</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 記帳分頁 -->
+            <section id="section-expense" class="hidden space-y-8">
+                <h2 class="text-3xl text-blue-600 flex items-center gap-2 px-2">
+                    <i data-lucide="wallet" class="w-8 h-8"></i> 探險帳本
+                </h2>
+                <div class="bg-gradient-to-br from-red-500 to-red-600 p-8 rounded-[3rem] text-white shadow-xl border-b-8 border-red-800">
+                    <p class="font-bold opacity-80 mb-1 text-sm">目前總花費</p>
+                    <p id="total-expense" class="text-5xl font-black">€ 0.00</p>
+                </div>
+                
+                <div class="itinerary-card p-8 space-y-4">
+                    <div class="flex gap-2">
+                        <input type="date" id="exp-date" class="flex-1 p-4 bg-gray-50 rounded-2xl font-bold border-none outline-none focus:ring-4 focus:ring-blue-100">
+                    </div>
+                    <input type="text" id="exp-item" placeholder="消費內容 (如: 蛋塔)" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none outline-none focus:ring-4 focus:ring-blue-100">
+                    <input type="number" id="exp-amount" placeholder="金額 (€)" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border-none outline-none focus:ring-4 focus:ring-blue-100">
+                    <button onclick="addExpense()" class="w-full btn-action justify-center">放入百寶袋</button>
+                    <button onclick="exportToGoogleSheets()" class="w-full bg-green-500 text-white p-4 rounded-2xl font-black border-b-6 border-green-700 active:transform active:translate-y-1 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="file-spreadsheet"></i> 匯出至 Google Sheets (CSV)
+                    </button>
+                </div>
+                <div id="expense-history" class="space-y-4"></div>
+            </section>
+        </main>
+
+        <!-- 導航列 -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t-8 border-blue-500 h-24 px-6 flex justify-around items-center z-[1000] rounded-t-[3.5rem] shadow-2xl">
+            <button onclick="showSection('itinerary')" class="nav-item flex flex-col items-center nav-active" id="nav-itinerary">
+                <i data-lucide="map-pin" class="w-10 h-10"></i>
+                <span class="font-black text-xs mt-1">冒險路線</span>
+            </button>
+            <button onclick="showSection('toolkit')" class="nav-item flex flex-col items-center text-gray-300" id="nav-toolkit">
+                <i data-lucide="briefcase" class="w-10 h-10"></i>
+                <span class="font-black text-xs mt-1">行李與道具</span>
+            </button>
+            <button onclick="showSection('expense')" class="nav-item flex flex-col items-center text-gray-300" id="nav-expense">
+                <i data-lucide="pocket" class="w-10 h-10"></i>
+                <span class="font-black text-xs mt-1">支出記帳</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // 固定波爾圖行程資料
+        const portoTrip = {
+            name: "波爾圖夢幻三日遊",
+            currency: "€",
+            langCode: "pt-PT",
+            survivalPhrases: [
+                { tw: "你好", local: "Olá", pinyin: "Oh-la" },
+                { tw: "謝謝", local: "Obrigado", pinyin: "Oh-bree-ga-doo" },
+                { tw: "請", local: "Por favor", pinyin: "Poor fah-vohr" },
+                { tw: "蛋塔", local: "Pastel de nata", pinyin: "Pash-tel de nah-tah" },
+                { tw: "多少錢？", local: "Quanto custa?", pinyin: "Kwan-too koosh-tah" }
+            ],
+            itinerary: [
+                {
+                    day: 1,
+                    locations: [
+                        { 
+                            name: "聖本篤車站 (São Bento)", 
+                            time: "09:00", 
+                            intro: "被譽為世界最美的火車站！大廳牆面鋪滿了兩萬片藍白色瓷磚，訴說著葡萄牙的歷史。這裡是波爾圖的中心，自助旅行的最佳起點。", 
+                            tips: "早上陽光透進來最美，建議早點到避開人潮。",
+                            mapUrl: "https://www.google.com/maps/search/São+Bento+Station",
+                            imgUrl: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=800&q=80"
+                        },
+                        { 
+                            name: "教士塔與教堂", 
+                            time: "11:30", 
+                            intro: "波爾圖的地標！你可以挑戰爬上 200 多階樓梯到塔頂，俯瞰整個波爾圖老城區和杜羅河景，非常震撼。", 
+                            tips: "門票可以現場買，但旺季建議線上預約。",
+                            mapUrl: "https://www.google.com/maps/search/Clérigos+Tower",
+                            imgUrl: "https://images.unsplash.com/photo-1590424753364-585807663972?auto=format&fit=crop&w=800&q=80"
+                        },
+                        { 
+                            name: "里貝拉廣場 (Ribeira)", 
+                            time: "15:00", 
+                            intro: "杜羅河畔最熱鬧的區域。彩色老房交織，這裡有許多咖啡廳，點一杯波特酒坐在河邊，感受悠閒的氛圍。", 
+                            tips: "這是看路易一世大橋的最佳角度，也是拍照聖地。",
+                            mapUrl: "https://www.google.com/maps/search/Cais+da+Ribeira",
+                            imgUrl: "https://images.unsplash.com/photo-1560582861-45078880e48e?auto=format&fit=crop&w=800&q=80"
+                        }
+                    ]
+                },
+                {
+                    day: 2,
+                    locations: [
+                        { 
+                            name: "路易一世大橋 (上層步行)", 
+                            time: "10:00", 
+                            intro: "這座鐵橋是由艾菲爾鐵塔設計者的學生設計的。建議一定要走上層步道，風景絕佳，還可以看地鐵穿過身邊。", 
+                            tips: "步行到河對岸的蓋亞新城 (Gaia) 可以參觀波特酒窖。",
+                            mapUrl: "https://www.google.com/maps/search/Luís+I+Bridge",
+                            imgUrl: "https://images.unsplash.com/photo-1581439645268-ea7bbe6bd091?auto=format&fit=crop&w=800&q=80"
+                        },
+                        { 
+                            name: "蓋亞新城酒窖區", 
+                            time: "14:00", 
+                            intro: "波爾圖最有名的波特酒就儲存在這裡。各大知名酒窖如 Graham's, Sandeman 都在這，可以參加導覽與品酒。", 
+                            tips: "記得預約品酒導覽，可以了解葡萄酒的製作歷史。",
+                            mapUrl: "https://www.google.com/maps/search/Port+Wine+Cellars+Gaia",
+                            imgUrl: "https://images.unsplash.com/photo-1553121239-47087858c89b?auto=format&fit=crop&w=800&q=80"
+                        }
+                    ]
+                },
+                {
+                    day: 3,
+                    locations: [
+                        { 
+                            name: "卡爾莫教堂 (Carmo)", 
+                            time: "10:00", 
+                            intro: "這座教堂的側面有一面巨大的藍瓷磚牆，是IG上最熱門的打卡景點。旁邊緊鄰著一棟全城最窄的房子。", 
+                            tips: "參觀完可以去附近的萊羅書店 (Livraria Lello)。",
+                            mapUrl: "https://www.google.com/maps/search/Carmo+Church+Porto",
+                            imgUrl: "https://images.unsplash.com/photo-1570698473651-b2de99bae12f?auto=format&fit=crop&w=800&q=80"
+                        }
+                    ]
+                }
+            ]
+        };
+
+        let expenses = [];
+        const today = new Date().toISOString().split('T')[0];
+
+        window.onload = function() {
+            document.getElementById('exp-date').value = today;
+            initApp();
+        };
+
+        function initApp() {
+            const selector = document.getElementById('day-selector');
+            selector.innerHTML = portoTrip.itinerary.map(d => `<option value="${d.day}">Day ${d.day}</option>`).join('');
+
+            document.getElementById('phrases-list').innerHTML = portoTrip.survivalPhrases.map(p => `
+                <div class="flex items-center justify-between bg-blue-50 p-6 rounded-3xl border-2 border-blue-100">
+                    <div>
+                        <p class="text-sm font-black text-blue-400 mb-1">${p.tw}</p>
+                        <p class="text-3xl font-black text-blue-900">${p.local}</p>
+                        <p class="text-lg text-gray-400 font-bold">${p.pinyin}</p>
+                    </div>
+                    <button onclick="speak('${p.local}')" class="btn-play">
+                        <i data-lucide="volume-2" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            updateDayView();
+            lucide.createIcons();
+        }
+
+        function updateDayView() {
+            const day = document.getElementById('day-selector').value;
+            const dayData = portoTrip.itinerary.find(d => d.day == day);
+            const list = document.getElementById('itinerary-list');
+            list.innerHTML = dayData.locations.map((loc, i) => `
+                <div class="itinerary-card">
+                    <div class="h-64 relative">
+                        <img src="${loc.imgUrl}" alt="${loc.name}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-6 left-8 text-white">
+                            <span class="bg-red-500 px-3 py-1 rounded-lg text-xs font-black mb-2 inline-block">⏱ ${loc.time}</span>
+                            <h3 class="text-3xl font-black">${loc.name}</h3>
+                        </div>
+                    </div>
+                    <div class="p-8 space-y-4">
+                        <p class="text-gray-600 font-bold leading-relaxed border-l-4 border-blue-400 pl-4">${loc.intro}</p>
+                        <div class="bg-yellow-50 p-4 rounded-2xl border-2 border-dashed border-yellow-300">
+                            <p class="text-yellow-800 text-sm font-black">💡 哆啦A夢提示：${loc.tips}</p>
+                        </div>
+                        <a href="${loc.mapUrl}" target="_blank" class="btn-action w-full justify-center">
+                            <i data-lucide="navigation"></i> 開啟地圖導航
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(`section-${id}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.remove('nav-active');
+                n.classList.add('text-gray-300');
+            });
+            document.getElementById(`nav-${id}`).classList.add('nav-active');
+            document.getElementById(`nav-${id}`).classList.remove('text-gray-300');
+            window.scrollTo(0, 0);
+        }
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = portoTrip.langCode;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function addExpense() {
+            const date = document.getElementById('exp-date').value;
+            const item = document.getElementById('exp-item').value;
+            const amount = parseFloat(document.getElementById('exp-amount').value);
+            
+            if(!item || isNaN(amount)) return;
+            
+            expenses.unshift({ date, item, amount });
+            renderExpenses();
+            
+            // 重置表單
+            document.getElementById('exp-item').value = '';
+            document.getElementById('exp-amount').value = '';
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expense-history');
+            let total = 0;
+            list.innerHTML = expenses.map(e => {
+                total += e.amount;
+                return `
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm flex justify-between items-center border-2 border-blue-50">
+                        <div>
+                            <p class="text-xs text-gray-400 font-black">${e.date}</p>
+                            <p class="text-xl font-black text-blue-900">${e.item}</p>
+                        </div>
+                        <span class="text-2xl font-black text-red-500">${portoTrip.currency} ${e.amount.toFixed(2)}</span>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('total-expense').innerText = `${portoTrip.currency} ${total.toFixed(2)}`;
+        }
+
+        function exportToGoogleSheets() {
+            if (expenses.length === 0) return alert("目前還沒有記帳資料喔！");
+            
+            // 建立 CSV 內容
+            let csvContent = "\uFEFF日期,項目,金額(€)\n"; // 加入 BOM 解決中文亂碼
+            expenses.forEach(e => {
+                csvContent += `${e.date},${e.item},${e.amount}\n`;
+            });
+
+            // 建立下載連結
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `波爾圖探險帳本_${today}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert("已產生 CSV 檔案！你可以直接將此檔案匯入 Google Sheets。");
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
