@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>哆啦A夢旅遊 App - LISBON</title>
+    <title>哆啦A夢旅遊 App - PORTO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -24,10 +24,11 @@
             margin: 0;
         }
 
-        h1 { font-family: 'ZCOOL+KuaiLe', sans-serif; font-size: 2.25rem; font-weight: 900; } 
-        h2 { font-family: 'ZCOOL+KuaiLe', sans-serif; font-size: 1.875rem; font-weight: 900; } 
-        h3 { font-family: 'ZCOOL+KuaiLe', sans-serif; font-size: 1.5rem; font-weight: 900; } 
-        
+        /* Typography 鎖定 */
+        h1 { font-family: 'ZCOOL+KuaiLe', sans-serif; font-size: 1.125rem; font-weight: 700; } 
+        h2 { font-family: 'ZCOOL+KuaiLe', sans-serif; font-size: 1.5rem; font-weight: 900; } 
+        .day-title { font-size: 1.5rem; font-weight: 900; } 
+        .location-title { font-size: 1.5rem; font-weight: 900; } 
         .content-body { font-size: 1.25rem; font-weight: 700; } 
         .tips-text { font-size: 1.125rem; font-weight: 700; } 
         .meta-text { font-size: 1rem; font-weight: 700; } 
@@ -60,6 +61,13 @@
         }
         .btn-action:active { transform: translateY(4px); border-bottom-width: 2px; }
 
+        .img-placeholder {
+            background: #dfe7ef;
+            height: 100%; width: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: #1e3a8a; padding: 20px; text-align: center;
+        }
+
         .nav-active { color: var(--dora-red); transform: scale(1.1); }
     </style>
 </head>
@@ -69,94 +77,84 @@
         <div class="flex items-center gap-3">
             <div class="real-bell"><div class="real-bell-hole"></div></div>
             <div>
-                <h1 class="leading-none text-blue-600">哆啦A夢旅遊 App</h1>
-                <p class="meta-text text-red-500 font-black">✈️ LISBON 🇵🇹 5 DAYS</p>
+                <h1 class="leading-none text-blue-600 font-bold">哆啦A夢旅遊 App</h1>
+                <p class="meta-text text-red-500 font-black">✈️ PORTO 🇵🇹 5 DAYS</p>
             </div>
         </div>
         <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center border-4 border-blue-500">
-            <i data-lucide="smile" class="text-blue-600 w-8 h-8"></i>
+            <i data-lucide="bell" class="text-blue-600 w-8 h-8"></i>
         </div>
     </header>
 
     <main class="max-w-xl mx-auto p-5">
-        
         <section id="section-itinerary" class="space-y-10">
             <div class="flex items-center justify-between">
-                <h2 class="text-blue-600 flex items-center gap-2">
-                    <i data-lucide="map-pinned"></i> ROUTE
+                <h2 class="text-blue-600 flex items-center gap-2 font-bold">
+                    <i data-lucide="map-pinned"></i> Route
                 </h2>
                 <select id="day-selector" onchange="updateDayView()" class="bg-blue-50 border-4 border-blue-500 rounded-2xl px-4 py-2 text-xl font-black text-blue-600 outline-none"></select>
             </div>
             
             <div id="day-content">
-                <div class="rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl mb-6 h-64">
-                    <img id="day-hero-img" src="" alt="Lisbon Map" class="w-full h-full object-cover">
+                <div class="rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl mb-6 h-64 relative bg-gray-200">
+                    <img id="day-hero-img" src="" alt="Map" class="w-full h-full object-cover" onerror="handleImgError(this, 'Map')">
                 </div>
-                <h2 id="day-title" class="mb-8 text-center text-red-500"></h2>
-                
+                <h2 id="day-title" class="day-title mb-8 text-center text-red-500 font-black"></h2>
                 <div id="itinerary-list" class="space-y-12"></div>
             </div>
         </section>
 
         <section id="section-toolkit" class="hidden space-y-10">
-            <h2 class="text-blue-600 flex items-center gap-2"><i data-lucide="package-search"></i> TOOLKIT</h2>
-
+            <h2 class="text-blue-600 flex items-center gap-2 font-bold"><i data-lucide="package-search"></i> Toolkit</h2>
             <div class="glass-card p-8 bg-blue-50/50">
-                <h3 class="mb-6 flex items-center gap-2 text-blue-700 underline">Before You Go</h3>
+                <h3 class="text-base font-bold mb-6 flex items-center gap-2 text-blue-700 underline">Before You Go</h3>
                 <div id="before-go-list" class="grid gap-4"></div>
             </div>
-
             <div class="glass-card p-8">
-                <h3 class="mb-6 flex items-center gap-2 text-blue-700 underline">Packing Checklist</h3>
+                <h3 class="text-base font-bold mb-6 flex items-center gap-2 text-blue-700 underline">Packing Checklist</h3>
                 <div id="packing-list" class="space-y-6"></div>
             </div>
-
             <div class="glass-card p-8">
-                <h3 class="mb-6 flex items-center gap-2 text-blue-700 underline">Survival Phrases</h3>
+                <h3 class="text-base font-bold mb-6 flex items-center gap-2 text-blue-700 underline">Survival Phrases</h3>
                 <div id="phrases-list" class="space-y-4"></div>
             </div>
-
             <div class="glass-card p-8 bg-yellow-50">
-                <h3 class="mb-6 flex items-center gap-2 text-yellow-700 underline">Must-Learn Signs</h3>
+                <h3 class="text-base font-bold mb-6 flex items-center gap-2 text-yellow-700 underline">Must-Learn Signs</h3>
                 <div id="must-learn-list" class="grid grid-cols-1 gap-4"></div>
             </div>
         </section>
 
         <section id="section-expense" class="hidden space-y-8">
-            <h2 class="text-blue-600 flex items-center gap-2"><i data-lucide="wallet"></i> EXPENSE</h2>
-            
+            <h2 class="text-blue-600 flex items-center gap-2 font-bold"><i data-lucide="wallet"></i> Expense</h2>
             <div class="bg-blue-600 p-10 rounded-[2.5rem] text-white shadow-2xl border-b-[12px] border-blue-800">
                 <p class="meta-text opacity-80 mb-2">Total Spent</p>
                 <p id="total-expense" class="text-5xl font-black">€ 0.00</p>
             </div>
-            
             <div class="glass-card p-8 space-y-5">
                 <input type="date" id="exp-date" class="w-full p-4 rounded-2xl border-4 border-blue-100 font-black text-xl">
-                <input type="text" id="exp-item" placeholder="Item Name (e.g. Pastéis)" class="w-full p-4 rounded-2xl border-4 border-blue-100 font-black text-xl">
+                <input type="text" id="exp-item" placeholder="Item Name (e.g. Egg Tart)" class="w-full p-4 rounded-2xl border-4 border-blue-100 font-black text-xl">
                 <input type="number" id="exp-amount" placeholder="Amount (€)" class="w-full p-4 rounded-2xl border-4 border-blue-100 font-black text-xl">
                 <button onclick="addExpense()" class="w-full btn-action text-2xl">ADD TO POCKET</button>
                 <button onclick="exportCSV()" class="w-full bg-green-500 text-white p-5 rounded-[2rem] font-black border-b-8 border-green-700 flex items-center justify-center gap-2 text-xl">
                     <i data-lucide="file-spreadsheet"></i> EXPORT CSV
                 </button>
             </div>
-            
             <div id="expense-history" class="space-y-4"></div>
         </section>
-
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t-8 border-blue-500 h-32 px-10 flex justify-around items-center z-[1000] rounded-t-[3.5rem] shadow-2xl">
         <button onclick="showSection('itinerary')" class="flex flex-col items-center nav-active" id="nav-itinerary">
             <i data-lucide="map" class="w-10 h-10"></i>
-            <span class="meta-text mt-1">Route</span>
+            <span class="meta-text mt-1 font-bold">Route</span>
         </button>
         <button onclick="showSection('toolkit')" class="flex flex-col items-center text-gray-300" id="nav-toolkit">
             <i data-lucide="briefcase" class="w-10 h-10"></i>
-            <span class="meta-text mt-1">Toolkit</span>
+            <span class="meta-text mt-1 font-bold">Toolkit</span>
         </button>
         <button onclick="showSection('expense')" class="flex flex-col items-center text-gray-300" id="nav-expense">
             <i data-lucide="shopping-cart" class="w-10 h-10"></i>
-            <span class="meta-text mt-1">Expense</span>
+            <span class="meta-text mt-1 font-bold">Expense</span>
         </button>
     </nav>
 
@@ -165,106 +163,118 @@
             days: [
                 {
                     day: 1,
-                    title: "🚋 市中心歷史漫步 (Baixa & Chiado)",
-                    hero: "https://images.unsplash.com/photo-1512100356132-dbf35528d20e?auto=format&fit=crop&w=1200&q=80",
+                    title: "🏙️ 老城瓷磚與世界最美車站",
+                    hero: "img/d1_map.jpg",
                     items: [
-                        { type: "景點", name: "📍 聖胡斯塔升降機 (Santa Justa Lift)", img: "https://images.unsplash.com/photo-1558190067-d39638b9c47c?auto=format&fit=crop&w=800&q=80", intro: "這座充滿工業美感的鋼鐵升降機是里斯本的經典地標！它是為了連接低地街道和高地廣場而建的。搭乘它緩緩升起，你可以看到整個 Baixa 區的整齊街廓和紅屋頂，景色超級壯觀，感覺就像穿梭在過去與未來之間！", tip: "如果你有購買里斯本 24 小時卡，可以免費搭乘喔！否則排隊時間通常很長，建議一早就去。", map: "https://www.google.com/maps/search/?api=1&query=Santa+Justa+Lift" },
-                        { type: "景點", name: "📍 商業廣場 (Praça do Comércio)", img: "https://images.unsplash.com/photo-1543165796-5426273dfbb3?auto=format&fit=crop&w=800&q=80", intro: "里斯本最宏偉的廣場，面向特茹河。這裡曾是皇宮所在地，現在則是著名的黃色建築環繞的開放空間。穿過宏偉的奧古斯塔街凱旋門，你就能感受到里斯本作為大航海時代中心的氣勢！", tip: "黃昏時分在河岸邊坐著吹風非常舒服，有時還有街頭藝人表演喔！", map: "https://www.google.com/maps/search/?api=1&query=Commerce+Square+Lisbon" },
-                        { type: "景點", name: "📍 卡爾莫修道院 (Carmo Convent)", img: "https://images.unsplash.com/photo-1590483561652-5a213e8ca797?auto=format&fit=crop&w=800&q=80", intro: "這座修道院在 1755 年大地震中失去了屋頂，現在作為遺址博物館。走在沒有屋頂的拱門下，看著陽光灑落在斷垣殘壁上，那種滄桑與神聖交織的美感，絕對是攝影愛好者的最愛！", tip: "這裡就在聖胡斯塔升降機出口附近，排行程時可以放在一起。", map: "https://www.google.com/maps/search/?api=1&query=Carmo+Convent+Lisbon" },
-                        { type: "美食", name: "🍴 Cervejaria Ramiro", img: "https://images.unsplash.com/photo-1551326844-4df70f78d0e9?auto=format&fit=crop&w=800&q=80", intro: "這可是里斯本的傳奇海鮮餐廳！大蝦、螃蟹、藤壺（Percebes）應有盡有。海鮮新鮮到不行，簡單的料理方式就能帶出最原始的美味，是老饕們的必排行程。", tip: "這家店非常有排隊人氣，建議在非尖峰時段去，最後記得加點一份牛排三明治（Prego）當甜點，這是當地吃法！", map: "https://www.google.com/maps/search/?api=1&query=Cervejaria+Ramiro" },
-                        { type: "美食", name: "🍴 Manteigaria", img: "https://images.unsplash.com/photo-1579306194872-63d33e1d7524?auto=format&fit=crop&w=800&q=80", intro: "除了貝倫區，這家的蛋塔也被許多當地人認為是第一名！餅皮酥脆、蛋液內餡滑順且甜度適中。你可以站在櫃台，點一杯咖啡配兩個蛋塔，完美體驗葡萄牙早餐。", tip: "在 Chiado 區就有分店，看著窗內師傅現場製作蛋塔非常有療癒感。", map: "https://www.google.com/maps/search/?api=1&query=Manteigaria+Lisbon" }
+                        { type: "景點", name: "📍 聖本托車站 São Bento Railway Station", img: "img/d1_1.jpg", intro: "這絕對是世界上最漂亮的火車站！大廳牆上貼滿了兩萬多塊漂亮的藍白色瓷磚（Azulejos），描述著葡萄牙的歷史故事。哆啦A夢建議你就算不搭火車，也一定要進來發呆十分鐘，感受那種被藝術包圍的震撼感！", tip: "清晨或深夜人最少，是拍攝無人空景的最佳時機喔！", map: "https://www.google.com/maps/search/São+Bento+Station" },
+                        { type: "景點", name: "📍 萊羅書店 Livraria Lello", img: "img/d1_2.jpg", intro: "傳說中《哈利波特》霍格華茲旋轉樓梯的靈感來源！這座書店有無比精美的木雕和彩繪玻璃天花板。雖然現在觀光客很多，但走進去那種古典魔幻的氣息，真的會讓你以為自己是個小巫師呢！", tip: "必須先在官網購買門票（Voucher），門票費可以折抵買書的錢！", map: "https://www.google.com/maps/search/Livraria+Lello" },
+                        { type: "景點", name: "📍 教士教堂 Clérigos Church", img: "img/d1_3.jpg", intro: "波多最著名的地標，高聳的鐘塔在城市各處都能看到。如果你體力不錯，爬上 225 階樓梯到達塔頂，就能把波多錯落有致的紅屋頂和杜羅河景觀盡收眼底，風景美到會哭！", tip: "樓梯非常窄，且是雙向通行，建議穿好走的運動鞋來挑戰。", map: "https://www.google.com/maps/search/Torre+dos+Clérigos" },
+                        { type: "美食", name: "🍴 Café Santiago", img: "img/d1_f1.jpg", intro: "來波多必吃的「濕答答三明治」（Francesinha）！這家店是當地人的最愛。厚實的土司夾入牛排、火腿、香腸，淋上濃郁的起司與特製啤酒醬汁，邪惡程度爆表，但每一口都是幸福！", tip: "份量極大，建議兩個女生合點一份就好，不然肚子會撐爆！", map: "https://www.google.com/maps/search/Café+Santiago" },
+                        { type: "美食", name: "🍴 Manteigaria", img: "img/d1_f2.jpg", intro: "就在波多傳統市場對面，這家的葡式蛋塔酥皮層次分明，內餡奶香濃郁卻不甜膩。看著店員現場製作、撒上肉桂粉後熱騰騰地入口，這才是道地的葡萄牙午後點心！", tip: "配上一杯當地的咖啡（Bica），絕對是旅行中的最佳充電站。", map: "https://www.google.com/maps/search/Manteigaria+Porto" }
                     ]
                 },
                 {
                     day: 2,
-                    title: "🌊 大航海的榮耀 (Belém)",
-                    hero: "https://images.unsplash.com/photo-1534445867742-43195f401b6c?auto=format&fit=crop&w=1200&q=80",
+                    title: "🍷 杜羅河畔與波特酒香",
+                    hero: "img/d2_map.jpg",
                     items: [
-                        { type: "景點", name: "📍 熱羅尼莫斯修道院 (Jerónimos Monastery)", img: "https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?auto=format&fit=crop&w=800&q=80", intro: "這座世界文化遺產是大航海時代財富的見證，曼努埃爾式建築的巔峰之作。石柱上雕刻著繩索、珊瑚等航海元素。偉大的航海家達伽馬也安息於此，壯麗程度保證讓你目瞪口呆！", tip: "門口排隊通常分成長隊（教堂）與短隊（修道院），記得看清楚喔！", map: "https://www.google.com/maps/search/?api=1&query=Jeronimos+Monastery" },
-                        { type: "景點", name: "📍 貝倫塔 (Belém Tower)", img: "https://images.unsplash.com/photo-1588612749448-b427b3780373?auto=format&fit=crop&w=800&q=80", intro: "這座防禦性的碉堡就像是特茹河上的明珠。它曾是探險家啟航的地點，象徵著發現新世界的希望。退潮時可以走到塔下，感受那股跨越數百年的勇氣。", tip: "進去塔內參觀有流量管制，如果只是想拍照，在外面拍更漂亮！", map: "https://www.google.com/maps/search/?api=1&query=Belem+Tower" },
-                        { type: "景點", name: "📍 發現者紀念碑 (Monument to the Discoveries)", img: "https://images.unsplash.com/photo-1534445867742-43195f401b6c?auto=format&fit=crop&w=800&q=80", intro: "這座巨大的帆船造型紀念碑，刻畫了亨利王子帶領著一眾航海家、科學家的英姿。地上的大理石世界地圖展示了葡萄牙昔日的全球足跡，非常震撼！", tip: "可以搭電梯到頂樓，俯瞰整個貝倫區和漂亮的熱羅尼莫斯修道院全景。", map: "https://www.google.com/maps/search/?api=1&query=Monument+to+the+Discoveries" },
-                        { type: "美食", name: "🍴 Pastéis de Belém", img: "https://images.unsplash.com/photo-1597839353245-2965768e1695?auto=format&fit=crop&w=800&q=80", intro: "這就是傳說中蛋塔的發源地！自 1837 年以來，他們一直守護著來自修道院的祕密配方。內餡滾燙酥香，灑上肉桂粉和糖粉是正宗吃法！", tip: "店內空間非常大（像迷宮一樣），內用通常比外帶排隊快很多喔！", map: "https://www.google.com/maps/search/?api=1&query=Pasteis+de+Belem" },
-                        { type: "美食", name: "🍴 Taberna dos Ferreiros", img: "https://images.unsplash.com/photo-1592663527359-cf6642f54cff?auto=format&fit=crop&w=800&q=80", intro: "隱藏在貝倫區的小巷內，提供非常地道的葡萄牙家常菜。必點馬介休（Bacalhau，醃鱈魚）料理，那種鮮鹹滋味與馬鈴薯的完美結合，非常有靈魂！", tip: "店面較小，晚餐建議提早預約或開門就去。", map: "https://www.google.com/maps/search/?api=1&query=Taberna+dos+Ferreiros" }
+                        { type: "景點", name: "📍 路易一世大橋 Ponte Luís I", img: "img/d2_1.jpg", intro: "波多的象徵！這座雙層鐵橋由艾菲爾鐵塔設計師的徒弟打造。上層走電車與行人，下層走汽車。站在橋上吹著微風，看著兩岸五顏六色的房子，這裡是全城市最有層次感的地方。", tip: "黃昏時分來走上層，夕陽映在河面上的金色光芒是波多最美的一刻。", map: "https://www.google.com/maps/search/Ponte+Luís+I" },
+                        { type: "景點", name: "📍 加亞新城酒窖區 Gaia Wine Cellars", img: "img/d2_2.jpg", intro: "跨過橋來到對岸，這裡聚集了世界上最知名的波特酒酒莊。波特酒是一種甜甜的強化葡萄酒。進去酒窖參觀，聞著厚實的橡木桶香氣，聽著釀酒歷史，這就是波多的靈魂所在！", tip: "知名酒莊如 Graham's 或 Taylor's 都要提早預約，現場去常會撲空。", map: "https://www.google.com/maps/search/Vila+Nova+de+Gaia+Wine+Cellars" },
+                        { type: "景點", name: "📍 河岸區 Ribeira District", img: "img/d2_3.jpg", intro: "被列為世界遺產的歷史城區，河邊佈滿了露天餐館與街頭藝人。古老的建築牆面斑駁卻充滿色彩，這裡是感受波多熱情活力與歷史沉積的最佳場所。隨便一站拍照都像電影劇照！", tip: "雖然這裡很美，但路邊推銷行程的人較多，記得保持微笑拒絕即可。", map: "https://www.google.com/maps/search/Ribeira+Porto" },
+                        { type: "美食", name: "🍴 Taberna Dos Mercadores", img: "img/d2_f1.jpg", intro: "隱藏在河岸巷弄間的超人氣小館。必點火焰鹽焗鱸魚，上桌時還會點火，聲光效果十足！魚肉鮮甜多汁，搭配當地的綠酒（Vinho Verde），保證讓你回味無窮！", tip: "店內位子非常少（不到 20 個），一定要在開店前半小時去排隊。", map: "https://www.google.com/maps/search/Taberna+Dos+Mercadores" },
+                        { type: "美食", name: "🍴 Gazela Cachorrinhos da Batalha", img: "img/d2_f2.jpg", intro: "這是波多特有的「熱狗三明治」。烤得酥脆的長條麵包夾入帶辣味的香腸和起司，切成小塊方便食用。波比（Boury）也曾推薦過這家，簡單卻令人上癮的街頭美味！", tip: "點餐時記得說「Cachorrinho」，最好再配一瓶 Super Bock 啤酒。", map: "https://www.google.com/maps/search/Cervejaria+Gazela" }
                     ]
                 },
                 {
                     day: 3,
-                    title: "🏰 童話般的辛特拉 (Sintra)",
-                    hero: "https://images.unsplash.com/photo-1582298538104-fe2e74c27f59?auto=format&fit=crop&w=1200&q=80",
+                    title: "🌊 海邊電車與現代藝術",
+                    hero: "img/d3_map.jpg",
                     items: [
-                        { type: "景點", name: "📍 佩納宮 (Pena Palace)", img: "https://images.unsplash.com/photo-1594903339097-c83818e7e169?auto=format&fit=crop&w=800&q=80", intro: "這是一座繽紛到不像現實的宮殿！亮黃色與大紅色的牆面、摩爾風格的裝飾，像是迪士尼城堡的現實版。它坐落在辛特拉的山頂，雲霧繚繞時非常神祕浪漫。", tip: "佩納宮的門票有嚴格的時段限制，請一定要提前在網上買好票，並預留充足的山路交通時間！", map: "https://www.google.com/maps/search/?api=1&query=Pena+Palace" },
-                        { type: "景點", name: "📍 雷加萊拉莊園 (Quinta da Regaleira)", img: "https://images.unsplash.com/photo-1582650841121-667744317f22?auto=format&fit=crop&w=800&q=80", intro: "比起宮殿，我更愛這裡！莊園內充滿了祕密隧道和神祕的螺旋天井（啟蒙井）。感覺就像走進了哈利波特的世界，到處都是有趣的機關與哥德式建築。", tip: "記得穿好走的運動鞋，莊園很大且坡度不小，很多隧道值得探險！", map: "https://www.google.com/maps/search/?api=1&query=Quinta+da+Regaleira" },
-                        { type: "景點", name: "📍 羅卡角 (Cabo da Roca)", img: "https://images.unsplash.com/photo-1583275483991-42187659923e?auto=format&fit=crop&w=800&q=80", intro: "「陸止於此，海始於斯」。這裡是歐洲大陸的最西端！站在懸崖邊，面對浩瀚無垠的大西洋，看著強風掀起巨浪，那種天涯海角的壯闊感真的會讓人心胸開闊！", tip: "海邊風非常大，不論天氣如何，請帶上一件擋風外套。", map: "https://www.google.com/maps/search/?api=1&query=Cabo+da+Roca" },
-                        { type: "美食", name: "🍴 Piriquita", img: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?auto=format&fit=crop&w=800&q=80", intro: "辛特拉當地的百年甜點店。必點 Travesseiro（意為枕頭），酥脆的派皮包著杏仁蛋奶油餡。還有當地的起司塔 Queijadas，味道非常特別。", tip: "這家在辛特拉老城區，逛完景點回來火車站前剛好去吃。", map: "https://www.google.com/maps/search/?api=1&query=Piriquita+Sintra" },
-                        { type: "美食", name: "🍴 Tascantiga", img: "https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?auto=format&fit=crop&w=800&q=80", intro: "位於辛特拉小巷中的溫馨餐廳，主打創意式的傳統 Tapas。在這裡可以點幾樣小食大家分著吃，非常適合旅行途中放鬆。", tip: "位置不多，建議抵達辛特拉後先去看看或訂位。", map: "https://www.google.com/maps/search/?api=1&query=Tascantiga+Sintra" }
+                        { type: "景點", name: "📍 1路老電車 Tram No. 1", img: "img/d3_1.jpg", intro: "搭乘復古的木造電車，沿著杜羅河一路向西往大西洋方向行駛。聽著軌道鏗鏘響聲，看著窗外波光粼粼，這是波多最浪漫的交通工具，感覺就像穿越回到了 20 世紀初！", tip: "電車班次較少且常擠滿人，建議在起站（Infante）就先排隊上車。", map: "https://www.google.com/maps/search/Tram+1+Porto" },
+                        { type: "景點", name: "📍 福斯區 Felgueiras 燈塔", img: "img/d3_2.jpg", intro: "走到杜羅河與大西洋的交匯處，這裡的海浪非常壯觀。看著巨大的浪花拍打在古老的燈塔上，那種大自然的純粹力量非常療癒。這裡的夕陽跟老城完全不同，是寬闊而寧靜的。", tip: "海邊風很大，即便是夏天也請帶一件薄外套，以免感冒囉！", map: "https://www.google.com/maps/search/Farol+de+Felgueiras" },
+                        { type: "景點", name: "📍 塞拉維斯現代藝術博物館 Serralves", img: "img/d3_3.jpg", intro: "這是一處遠離鬧區的淨土，由普立茲克獎得主設計的粉色建築。館內收藏了許多前衛藝術，還有一個巨大的森林公園和高空步道。走在樹冠層中呼吸新鮮空氣，非常舒服！", tip: "週日早上通常有優惠或免費時段，可以上官網確認省點門票錢。", map: "https://www.google.com/maps/search/Serralves+Museum" },
+                        { type: "美食", name: "🍴 Pedro Lemos", img: "img/d3_f1.jpg", intro: "位於福斯區的米其林一星餐廳，如果想在旅途中來場奢侈的饗宴，這裡是不二之選。主廚將傳統葡萄牙食材以現代方式演繹，精緻得像藝術品，味道更是無懈可擊！", tip: "晚餐價位較高，可以嘗試午間套餐，CP值會高出許多喔！", map: "https://www.google.com/maps/search/Pedro+Lemos+Porto" },
+                        { type: "美食", name: "🍴 Confeitaria do Bolhão", img: "img/d3_f2.jpg", intro: "這是一間創立於 1896 年的百年糕點店。店內裝潢充滿了美好年代的華麗感。這裡的各種傳統甜點如馬鈴薯派、無花果塔都非常道地，是當地老奶奶也愛去的店！", tip: "這裡也有賣現做的便宜餐包，適合買著當隔天的早餐。", map: "https://www.google.com/maps/search/Confeitaria+do+Bolhão" }
                     ]
                 },
                 {
                     day: 4,
-                    title: "🎶 老城區靈魂與電車 (Alfama)",
-                    hero: "https://images.unsplash.com/photo-1512100356132-dbf35528d20e?auto=format&fit=crop&w=1200&q=80",
+                    title: "🛶 威尼斯分身與彩虹條紋屋",
+                    hero: "img/d4_map.jpg",
                     items: [
-                        { type: "景點", name: "📍 聖喬治城堡 (São Jorge Castle)", img: "https://images.unsplash.com/photo-1590075865003-e48277faf551?auto=format&fit=crop&w=800&q=80", intro: "坐落在里斯本最高的山頭上，這座中世紀城堡曾是防禦要塞。走在城牆上，可以 360 度無死角俯瞰整個里斯本老城和特茹河。城堡裡還有很多漂亮的孔雀會陪你散步喔！", tip: "這裡夕陽非常漂亮，建議傍晚前來，看著整座城市染成金黃色。", map: "https://www.google.com/maps/search/?api=1&query=Sao+Jorge+Castle" },
-                        { type: "景點", name: "📍 太陽門觀景台 (Miradouro das Portas do Sol)", img: "https://images.unsplash.com/photo-1589136142550-c7395646f906?auto=format&fit=crop&w=800&q=80", intro: "這是里斯本最上鏡的觀景台！一眼望去是 Alfama 區密密麻麻的紅屋頂，遠處還有教堂的白色尖塔。這裡是感受「慢城」氛圍的最佳場所，拍照起來像極了明信片。", tip: "路邊有很多咖啡店，雖然稍貴，但配著這個景色絕對值得！", map: "https://www.google.com/maps/search/?api=1&query=Miradouro+das+Portas+do+Sol" },
-                        { type: "景點", name: "📍 28 號黃色電車 (Tram 28)", img: "https://images.unsplash.com/photo-1520106212299-d99c443e4568?auto=format&fit=crop&w=800&q=80", intro: "雖然是交通工具，但它本身就是一個景點！這部古老的電車會穿過極其狹窄的小巷、陡峭的坡道，窗外的風景就像快速移動的幻燈片。它是里斯本活生生的博物館！", tip: "這台電車非常有名的多扒手，請務必把背包背在胸前，並握緊扶手！", map: "https://www.google.com/maps/search/?api=1&query=Tram+28+Route+Lisbon" },
-                        { type: "美食", name: "🍴 Time Out Market", img: "https://images.unsplash.com/photo-1555126634-323283e090fa?auto=format&fit=crop&w=800&q=80", intro: "這是一座大型的美食市集，集結了里斯本許多名店的縮小版。無論你想吃海鮮、漢堡、傳統料理或甜點，這裡都能一次滿足。氣氛熱鬧得不得了！", tip: "先在市集繞一圈，看準想吃的再買。位子是公用的，看到空位就要趕快佔領！", map: "https://www.google.com/maps/search/?api=1&query=Time+Out+Market+Lisbon" },
-                        { type: "美食", name: "🍴 Casa de Linhares (Fado)", img: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=800&q=80", intro: "來到里斯本一定要聽 Fado（法朵）！這家餐廳提供高品質的現場表演。歌手深情憂傷的歌聲配上吉他伴奏，講述著葡萄牙人的「Saudade」（鄉愁/思念），非常有渲染力。", tip: "法朵餐廳通常是套餐制，需要提早訂位，且表演時請保持安靜喔。", map: "https://www.google.com/maps/search/?api=1&query=Casa+de+Linhares+Fado" }
+                        { type: "景點", name: "📍 阿維羅 Moliceiros 遊船", img: "img/d4_1.jpg", intro: "今天坐火車去波多近郊的阿維羅（Aveiro），這裡被稱為葡萄牙的威尼斯。搭乘色彩斑斕、船頭畫著幽默圖案的 Moliceiros 遊河，穿梭在城市水道中，感覺整個人都放鬆了下來！", tip: "// TODO: VERIFY CHECK TRAIN TIMES FROM SAO BENTO", map: "https://www.google.com/maps/search/Aveiro+Canal" },
+                        { type: "景點", name: "📍 哥斯達新海灘 Costa Nova", img: "img/d4_2.jpg", intro: "從阿維羅搭公車 15 分鐘就能到達。這裡最吸睛的就是一排排塗成「彩虹條紋」的彩色木屋（Palheiros）。這些房子以前是漁民存放工具的地方，現在則是波多最夯的打卡聖地！", tip: "這些房子現在大多是私人住宅，拍照時要保持安靜，不要打擾到鄰居喔。", map: "https://www.google.com/maps/search/Costa+Nova+Striped+Houses" },
+                        { type: "景點", name: "📍 阿維羅大教堂 Aveiro Cathedral", img: "img/d4_3.jpg", intro: "雖然規模不如波多老城的大，但這座教堂內部精美的木雕和寧靜的氛圍非常迷人。教堂外的廣場很適合散步，可以感受到與波多截然不同的悠閒慢步調。", tip: "教堂對面的博物館收藏了許多當地藝術品，時間充裕的話可以進去逛逛。", map: "https://www.google.com/maps/search/Sé+de+Aveiro" },
+                        { type: "美食", name: "🍴 O Bairro", img: "img/d4_f1.jpg", intro: "位於阿維羅市中心的創意餐廳。他們把當地的傳統食材如銀魚、鰻魚用創新的方式呈現。裝潢時髦且服務非常親切，是阿維羅評價極高的用餐地點！", tip: "必點他們的軟蛋甜點創意版（Ovos Moles dessert），很有特色！", map: "https://www.google.com/maps/search/O+Bairro+Aveiro" },
+                        { type: "美食", name: "🍴 Confeitaria Peixinho", img: "img/d4_f2.jpg", intro: "阿維羅最老的軟蛋甜點店（Ovos Moles）。這種用薄米紙包著蛋黃與糖製成的甜點，形狀像貝殼或魚。雖然對台灣人口味來說偏甜，但這可是受法律保護的文化遺產喔！", tip: "買一小盒嘗鮮即可，建議配著濃茶一起吃最剛好。", map: "https://www.google.com/maps/search/Confeitaria+Peixinho" }
                     ]
                 },
                 {
                     day: 5,
-                    title: "🏙️ 現代魅力與磁磚藝術 (Parque das Nações)",
-                    hero: "https://images.unsplash.com/photo-1543783232-475031b40b6d?auto=format&fit=crop&w=1200&q=80",
+                    title: "🎨 城市藝術與靈魂採買",
+                    hero: "img/d5_map.jpg",
                     items: [
-                        { type: "景點", name: "📍 國家磁磚博物館 (National Tile Museum)", img: "https://images.unsplash.com/photo-1582239454131-7b79758525b6?auto=format&fit=crop&w=800&q=80", intro: "磁磚 (Azulejo) 是葡萄牙的靈魂。這家博物館設在一座古老修道院內，展示了從 15 世紀至今的精美瓷磚。最震撼的是一幅長達 23 公尺、描繪 1755 年大地震前里斯本全貌的藍白瓷磚畫！", tip: "博物館內有一間非常漂亮的餐廳，牆壁全是瓷磚，很適合吃午餐。", map: "https://www.google.com/maps/search/?api=1&query=National+Tile+Museum+Lisbon" },
-                        { type: "景點", name: "📍 里斯本海洋水族館 (Oceanário de Lisboa)", img: "https://images.unsplash.com/photo-1502675135487-e971002a6adb?auto=format&fit=crop&w=800&q=80", intro: "這是歐洲最大的水族館之一，位於現代化的世博園區。巨大的中央水槽讓你感覺像身處海底，還有超萌的海獺和各種奇特的海洋生物。建築物本身也像是漂浮在水上的船艦！", tip: "就在 Vasco da Gama 購物中心旁，適合全家人一起來消磨時光。", map: "https://www.google.com/maps/search/?api=1&query=Oceanario+de+Lisboa" },
-                        { type: "景點", name: "📍 國家公園纜車 (Teleférico das Nações)", img: "https://images.unsplash.com/photo-1543783232-475031b40b6d?auto=format&fit=crop&w=800&q=80", intro: "搭乘這段河岸纜車，你可以從空中俯瞰世博園區的現代建築，以及壯觀的萬斯科·達伽馬大橋（歐洲最長的橋樑之一）。這裡與老城區截然不同的現代感，會讓你看到里斯本的另一面。", tip: "纜車單程約 10 分鐘，吹著河風看風景非常紓壓。", map: "https://www.google.com/maps/search/?api=1&query=Lisbon+Cable+Car+Nacoes" },
-                        { type: "美食", name: "🍴 Solar dos Presuntos", img: "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80", intro: "這是一家充滿明星簽名的傳統老牌餐廳。海鮮飯（Arroz de Marisco）做得非常到位，濃郁的湯汁吸滿了海鮮精華，每一口都是幸福感。", tip: "雖然不在世博區，但在旅行最後一晚回來市中心享用這頓大餐非常完美！務必提早預約。", map: "https://www.google.com/maps/search/?api=1&query=Solar+dos+Presuntos" },
-                        { type: "美食", name: "🍴 Santini Gelato", img: "https://images.unsplash.com/photo-1501443762994-82bd5dace89a?auto=format&fit=crop&w=800&q=80", intro: "葡萄牙最有名的手工冰淇淋店！它的紅白條紋設計非常搶眼。水果口味的雪酪（Sorbet）非常新鮮純粹，像是直接在吃冷凍水果一樣。", tip: "火車站或購物中心都有分店，旅行最後一定要吃一支才圓滿！", map: "https://www.google.com/maps/search/?api=1&query=Santini+Gelato+Lisbon" }
+                        { type: "景點", name: "📍 聖卡塔琳娜街 Rua de Santa Catarina", img: "img/d5_1.jpg", intro: "波多最熱鬧的購物步行街！各大國際品牌和在地小店都在這裡。路上還有穿著黑長袍、像哈利波特一樣的傳統學生在籌款歌唱，氣氛熱鬧得不得了！", tip: "週末這條街會非常擠，要注意隨身財物，扒手偶爾會出沒喔。", map: "https://www.google.com/maps/search/Rua+de+Santa+Catarina" },
+                        { type: "景點", name: "📍 靈魂教堂 Chapel of Souls", img: "img/d5_2.jpg", intro: "這是一座外牆完全被藍白色瓷磚覆蓋的教堂！雖然規模不大，但那種極致的藍色在陽光下非常耀眼。它是波多所有瓷磚教堂中最適合近距離觀察瓷磚細節的地方。", tip: "就位於地鐵站 Bolhão 出口處，交通非常方便，適合當作採購日的中繼站。", map: "https://www.google.com/maps/search/Capela+das+Almas" },
+                        { type: "景點", name: "📍 傳統市場 Mercado do Bolhão", img: "img/d5_3.jpg", intro: "波多的廚房！最近才剛整修完成。這裡可以買到最道地的罐頭魚、軟木製品、橄欖油和當季水果。哆啦A夢最推薦來這裡尋寶，買些特別的伴手禮帶回家！", tip: "市場裡有幾攤專賣新鮮生蠔和綠酒的攤位，可以站著即開即吃！", map: "https://www.google.com/maps/search/Mercado+do+Bolhão" },
+                        { type: "美食", name: "🍴 Majestic Cafe", img: "img/d5_f1.jpg", intro: "世界最美十大咖啡館之一！1920 年代的凡爾賽風格，金碧輝煌的裝潢與大理石牆面。據說羅琳就是在這裡寫下哈利波特初稿的。坐在裡面喝咖啡，感覺自己身分都高貴了起來！", tip: "這裡物價比其他店高出不少，但為了這份氛圍，進來點份下午茶是很值得的。", map: "https://www.google.com/maps/search/Majestic+Cafe" },
+                        { type: "美食", name: "🍴 Casa Guedes", img: "img/d5_f2.jpg", intro: "這家店以烤乳豬三明治（Sandes de Pernil）聞名全城！切碎的香嫩乳豬肉夾入軟Q麵包，再加上濃郁的山羊起司。雖然環境簡單，但這就是波多最真實、最強悍的味道！", tip: "乳豬肉汁很多，吃的時候小心滴到衣服喔！", map: "https://www.google.com/maps/search/Casa+Guedes+Porto" }
                     ]
                 }
             ],
             packing: {
-                "Documents": ["護照(及影本)", "申根區旅遊保險單", "里斯本卡確認單", "辛特拉門票電子檔", "飯店地址筆記"],
-                "Electronics": ["歐洲雙圓頭轉接器", "大容量行動電源", "歐洲 5G SIM/eSIM", "降噪耳機", "多口充電頭"],
-                "Health": ["強力防曬乳", "墨鏡", "個人常備藥", "護腿舒緩貼(爬坡必備)", "乾洗手"],
-                "Clothing": ["**抓地力強的球鞋**", "擋風外套(海邊用)", "適合拍照的繽紛衣服", "輕便雨傘", "防盜隱形錢包"]
+                "Documents": ["護照與簽證", "申根保險證明", "訂房紀錄與機票", "國際駕照", "學生證(波多景點常有優惠)"],
+                "Electronics": ["歐規雙圓轉接頭", "行動電源(導航極耗電)", "葡萄牙 SIM 卡/eSIM", "備用充電線", "相機與大容量記憶卡"],
+                "Health": ["止滑好走的鞋(坡路必備)", "防曬乳", "個人藥品", "腸胃藥(應付波特酒與高油)", "口罩"],
+                "Clothing": ["舒適慢跑鞋(波多是山城)", "防風外套(河邊海邊風大)", "太陽眼鏡", "輕便雨傘", "防盜隱形腰包"]
             },
             phrases: [
-                { local: "Olá!", tw: "你好！" },
-                { local: "Obrigado/a", tw: "謝謝 (男/女)" },
-                { local: "Por favor", tw: "請 / 麻煩了" },
-                { local: "A conta, por favor", tw: "請買單" },
-                { local: "Onde é o banheiro?", tw: "廁所在哪裡？" },
+                { local: "Olá", tw: "你好" },
+                { local: "Obrigado/a", tw: "謝謝" },
+                { local: "Por favor", tw: "請 / 麻煩你" },
                 { local: "Quanto custa?", tw: "多少錢？" },
-                { local: "Desculpe", tw: "對不起 / 抱歉" },
-                { local: "Fala inglês?", tw: "你會說英文嗎？" },
-                { local: "Um pastel de nata, por favor", tw: "請給我一個蛋塔" },
-                { local: "Tchau!", tw: "再見！" }
+                { local: "A conta, por favor", tw: "請結帳" },
+                { local: "Saúde!", tw: "乾杯！" },
+                { local: "Desculpe", tw: "對不起" },
+                { local: "Onde é o café?", tw: "咖啡廳在哪？" },
+                { local: "Uma cerveja, por favor", tw: "請給我一杯啤酒" },
+                { local: "Adeus", tw: "再見" }
             ],
             mustLearn: [
                 { sign: "Entrada / Saída", use: "入口 / 出口" },
                 { sign: "Aberto / Fechado", use: "營業中 / 休息中" },
-                { sign: "Puxe / Empurre", use: "拉 / 推" },
-                { sign: "Cuidado!", use: "小心！ (常用於電車)" },
-                { sign: "Homens / Mulheres", use: "男 / 女 (廁所)" },
-                { sign: "Comboio", use: "火車" },
-                { sign: "Autocarro", use: "巴士" },
-                { sign: "Elétrico", use: "電車 (如 28 號)" },
-                { sign: "Miradouro", use: "觀景台 (里斯本超多)" },
-                { sign: "Farmácia", use: "藥局 (綠色十字標誌)" }
+                { sign: "Empurrar / Puxar", use: "推 / 拉" },
+                { sign: "Homens / Mulheres", use: "男廁 / 女廁" },
+                { sign: "Comboio / Metro", use: "火車 / 地鐵" },
+                { sign: "Paragem", use: "公車站" },
+                { sign: "Farmácia", use: "藥局" },
+                { sign: "Cuidado!", use: "注意！小心！" },
+                { sign: "Rua", use: "街道 (常縮寫為 R.)" },
+                { sign: "WC", use: "洗手間" }
             ],
             beforeGo: [
-                { icon: "🎒", title: "注意扒手", desc: "28號電車與著名觀光區扒手多，包包必背胸前！" },
-                { icon: "👟", title: "必穿防滑鞋", desc: "里斯本是著名的「七丘之城」，石板路極滑且坡度大。" },
-                { icon: "🎫", title: "預約門票", desc: "佩納宮與熱羅尼莫斯修道院務必提前官網購票。" },
-                { icon: "💳", title: "里斯本卡", desc: "市區交通與博物館套票，推薦買 24 或 48 小時卡。" },
-                { icon: "☀️", title: "防曬保濕", desc: "海邊陽光強且氣候較乾，隨身攜帶水壺補充水分。" },
-                { icon: "🍴", title: "用餐時間", desc: "晚餐通常 19:30 後開始，熱門餐廳一定要先訂位。" }
+                { icon: "👟", title: "好鞋第一", desc: "波多是著名的「斜坡之城」，全是鵝卵石坡路，一定要穿最好走的鞋！" },
+                { icon: "🍷", title: "波特酒威力", desc: "波特酒酒精濃度較高且甜，很容易不小心喝醉，記得慢慢品嘗。" },
+                { icon: "🎫", title: "安丹特卡", desc: "買一張 Andante 卡，儲值後可搭地鐵公車，記得進站都要刷卡（Validate）。" },
+                { icon: "🕒", title: "吃飯節奏", desc: "午餐通常 13:00 開始，晚餐 20:00 是高峰。熱門餐廳務必預約。" },
+                { icon: "🥛", title: "水質建議", desc: "自來水可飲用但口感硬，建議去超市買大罐礦泉水比較好喝。" },
+                { icon: "💶", title: "準備零錢", desc: "雖然刷卡普及，但有些老店或傳統市場只收現金，建議備點小額歐元。" },
+                { icon: "🧴", title: "防風保暖", desc: "大西洋的海風不是開玩笑的，即便是夏天，入夜後溫差也很大。" },
+                { icon: "🎒", title: "防盜意識", desc: "雖然治安相對好，但在聖本托車站等觀光區還是要提防扒手。" },
+                { icon: "🚻", title: "找廁所法", desc: "公共廁所不多，建議在咖啡廳點杯咖啡後順便借用廁所。" },
+                { icon: "🚨", title: "緊急熱線", desc: "歐盟通用救難電話為 112，請記在手機裡備用。" }
             ]
         };
 
-        let expenses = JSON.parse(localStorage.getItem('lisbon_expenses') || '[]');
+        let expenses = JSON.parse(localStorage.getItem('porto_expenses') || '[]');
+
+        function handleImgError(img, name) {
+            img.style.display = 'none';
+            const placeholder = document.createElement('div');
+            placeholder.className = 'img-placeholder';
+            placeholder.innerText = `請放入圖片：${img.getAttribute('src')}\n(${name})`;
+            img.parentNode.appendChild(placeholder);
+        }
 
         function initApp() {
             const selector = document.getElementById('day-selector');
@@ -272,9 +282,9 @@
             
             document.getElementById('packing-list').innerHTML = Object.entries(tripData.packing).map(([cat, items]) => `
                 <div>
-                    <p class="text-blue-600 font-black mb-2">${cat}</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        ${items.map(i => `<label class="flex items-center gap-2 meta-text"><input type="checkbox"> ${i}</label>`).join('')}
+                    <p class="text-blue-600 font-black mb-2 text-xl">${cat}</p>
+                    <div class="grid grid-cols-1 gap-3">
+                        ${items.map(i => `<label class="flex items-center gap-3 content-body"><input type="checkbox" class="w-6 h-6"> ${i}</label>`).join('')}
                     </div>
                 </div>
             `).join('');
@@ -285,24 +295,24 @@
                         <p class="meta-text text-blue-400">${p.tw}</p>
                         <p class="text-2xl font-black text-blue-900">${p.local}</p>
                     </div>
-                    <button onclick="speak('${p.local}')" class="w-12 h-12 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-md">
+                    <button onclick="speak('${p.local}')" class="w-14 h-14 bg-blue-500 text-white rounded-xl flex items-center justify-center shadow-md">
                         <i data-lucide="volume-2"></i>
                     </button>
                 </div>
             `).join('');
 
             document.getElementById('must-learn-list').innerHTML = tripData.mustLearn.map(m => `
-                <div class="flex justify-between border-b-2 border-yellow-200 py-2">
+                <div class="flex justify-between border-b-2 border-yellow-200 py-4">
                     <span class="text-xl font-black text-yellow-800">${m.sign}</span>
-                    <span class="meta-text text-yellow-600">${m.use}</span>
+                    <span class="tips-text text-yellow-600">${m.use}</span>
                 </div>
             `).join('');
 
             document.getElementById('before-go-list').innerHTML = tripData.beforeGo.map(b => `
-                <div class="flex gap-3 items-start">
-                    <span class="text-2xl">${b.icon}</span>
+                <div class="flex gap-4 items-start bg-white p-4 rounded-3xl shadow-sm">
+                    <span class="text-3xl">${b.icon}</span>
                     <div>
-                        <p class="meta-text font-black text-blue-800">${b.title}</p>
+                        <p class="content-body font-black text-blue-800">${b.title}</p>
                         <p class="tips-text text-gray-600 leading-tight">${b.desc}</p>
                     </div>
                 </div>
@@ -317,23 +327,25 @@
         function updateDayView() {
             const dayNum = document.getElementById('day-selector').value;
             const day = tripData.days.find(d => d.day == dayNum);
-            
-            document.getElementById('day-hero-img').src = day.hero;
+            const heroImg = document.getElementById('day-hero-img');
+            heroImg.style.display = 'block';
+            heroImg.src = day.hero;
+            const existingPlaceholder = heroImg.parentNode.querySelector('.img-placeholder');
+            if (existingPlaceholder) existingPlaceholder.remove();
             document.getElementById('day-title').innerText = day.title;
-            
             document.getElementById('itinerary-list').innerHTML = day.items.map(item => `
                 <div class="glass-card overflow-hidden">
-                    <div class="h-56 relative">
-                        <img src="${item.img}" class="w-full h-full object-cover">
+                    <div class="h-64 relative bg-gray-200">
+                        <img src="${item.img}" class="w-full h-full object-cover" onerror="handleImgError(this, '${item.name}')">
                         <div class="absolute top-4 left-4 bg-red-500 text-white px-4 py-1 rounded-full font-black meta-text">${item.type}</div>
                     </div>
                     <div class="p-8 space-y-4">
-                        <h3 class="text-blue-900">${item.name}</h3>
+                        <h3 class="location-title text-blue-900">${item.name}</h3>
                         <p class="content-body text-gray-600 leading-relaxed">${item.intro}</p>
-                        <div class="bg-yellow-100 p-4 rounded-2xl border-l-8 border-yellow-400">
+                        <div class="bg-yellow-100 p-5 rounded-2xl border-l-8 border-yellow-400">
                             <p class="tips-text text-yellow-800">💡 哆啦A夢提示：${item.tip}</p>
                         </div>
-                        <a href="${item.map}" target="_blank" class="btn-action text-xl">OPEN MAP</a>
+                        <a href="${item.map}" target="_blank" class="btn-action text-2xl">OPEN MAP</a>
                     </div>
                 </div>
             `).join('');
@@ -365,7 +377,7 @@
             const amount = parseFloat(document.getElementById('exp-amount').value);
             if(!item || isNaN(amount)) return;
             expenses.unshift({ date, item, amount, currency: '€', note: '' });
-            localStorage.setItem('lisbon_expenses', JSON.stringify(expenses));
+            localStorage.setItem('porto_expenses', JSON.stringify(expenses));
             renderExpenses();
             document.getElementById('exp-item').value = '';
             document.getElementById('exp-amount').value = '';
@@ -397,7 +409,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `Lisbon_Expenses_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `Porto_Expenses_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
         }
 
