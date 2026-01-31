@@ -6,7 +6,7 @@
     <title>哆啦A夢任意門 - 我的旅遊清單</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Nunito:wght@900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Iansui+KuaiLe&family=Nunito:wght@900&display=swap');
         
         body {
             font-family: 'Iansui', sans-serif;
@@ -32,27 +32,67 @@
             font-family: 'Iansui', sans-serif;
         }
 
-        /* ⭐ 標題膠囊：寬度 85%, 藍底金邊, 標題純白 */
+        /* ⭐ 酷炫立體標題膠囊 */
         .header-capsule {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 16px;
-            padding: 12px 0;
+            padding: 14px 0;
             width: 85%;
             margin: 0 auto;
-            background: #3b82f6;
+            background: linear-gradient(145deg, #3b82f6, #2563eb); /* 漸層增加厚度感 */
             border: 4px solid #ffd700;
             border-radius: 9999px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            
+            /* 核心立體陰影：模擬實體厚度感 */
+            box-shadow: 
+                0 10px 0 #1d4ed8,      /* 下層實心厚度 */
+                0 15px 25px rgba(0,0,0,0.25); /* 底部柔和投影 */
+            
+            position: relative;
+            overflow: hidden; 
+            animation: float 3s ease-in-out infinite; /* 漂浮動畫 */
+        }
+
+        /* ✨ 流光效果：一道白光劃過表面 */
+        .header-capsule::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -100%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(
+                90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.4), 
+                transparent
+            );
+            transform: rotate(30deg);
+            animation: shine 4s infinite ease-in-out;
+        }
+
+        /* 漂浮動畫 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 流光動畫 */
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 120%; }
+            100% { left: 120%; }
         }
 
         .header-capsule h1 {
-            color: white;
+            color: white !important;
             font-size: 32px;
             font-weight: 900;
             letter-spacing: 2px;
-            text-shadow: none; /* 嚴禁陰影 */
+            z-index: 10;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1) !important; /* 極輕微陰影增加字體清晰度 */
         }
 
         /* 城市卡片基礎 */
@@ -97,13 +137,15 @@
 
 <body class="p-6 pb-20">
 
-    <header class="mb-10 pt-10 relative z-10 max-w-md mx-auto text-center">
+    <header class="mb-14 pt-10 relative z-10 max-w-md mx-auto text-center">
         <div class="header-capsule">
-            <span class="text-2xl">🚪</span>
+            <span class="text-3xl animate-bounce" style="animation-duration: 2s;">🚪</span>
             <h1>任意門</h1>
-            <span class="text-2xl">🔔</span>
+            <span class="text-3xl">🔔</span>
         </div>
-        <p class="text-xl font-bold text-blue-500 opacity-80 mt-4">我的哆啦A夢旅遊 App 系列</p>
+        <p class="text-xl font-bold text-blue-600 opacity-90 mt-6 tracking-widest">
+            DORAEMON TRAVEL APP
+        </p>
     </header>
 
     <div class="grid gap-8 max-w-md mx-auto relative z-10">
@@ -137,8 +179,6 @@
                 <p class="text-white italic text-sm opacity-90 text-with-outline mt-1">Sipping wine by the Douro river.</p>
             </div>
         </a>
-
-        
 
     </div>
 
