@@ -443,14 +443,19 @@
 
             let html = `
                 <div class="flex flex-col gap-6 fade-in pb-10">
-                    <div class="bg-gradient-to-br from-emerald-400 to-teal-600 rounded-[2rem] p-6 text-white shadow-lg relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
-                        <p class="text-emerald-100 font-bold mb-1">總支出 (Total)</p>
-                        <div class="flex items-baseline gap-2">
-                            <span class="text-4xl font-black">€${totalEuro.toFixed(2)}</span>
-                            <span class="text-lg opacity-80">≈ NT$${totalTWD}</span>
-                        </div>
-                    </div>
+                    
+
+<div class="bg-gradient-to-br from-emerald-400 to-teal-600 rounded-[2rem] p-6 text-white shadow-lg relative overflow-hidden">
+    <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
+    <p class="text-emerald-100 font-bold mb-1">總支出 (Total)</p>
+    
+    <div class="flex flex-col gap-1">
+        <span class="text-4xl font-black">€${totalEuro.toFixed(2)}</span>
+        
+        <span class="text-xl font-bold opacity-90">≈ NT$${totalTWD.toLocaleString()}</span>
+    </div>
+</div>
+
 
 <div class="grid grid-cols-3 gap-3">
     ${categories.map(c => `
@@ -517,43 +522,64 @@
             lucide.createIcons();
         }
 
-        function prefillCategory(catName) {
-            const nameInput = document.getElementById('exp-name');
-            nameInput.value = catName + " - ";
-            nameInput.focus(); // Focus 輸入框讓使用者繼續打字
-        }
+       function prefillCategory(catName) {
+    const nameInput = document.getElementById('exp-name');
+    if (!nameInput) return;
 
+    nameInput.value = catName + " - ";
+    
+    // 讓輸入框獲得焦點
+    nameInput.focus();
+    
+    // 將游標移到文字最後面，讓你可以接著輸入細項
+    const len = nameInput.value.length;
+    nameInput.setSelectionRange(len, len);
+    
+    // 同步讓對應的按鈕看起來被選中了 (UI 反饋)
+    const targetBtn = document.getElementById(`btn-cat-${catName}`);
+    if (targetBtn) {
+        // 這裡不需要讓按鈕搶走 focus，只需要讓它看起來被點過即可
+        // 或是可以給它一個暫時的亮色效果
+    }
+}
         function handleEnter(e, nextTarget) {
-            if (e.key === 'Enter') {
-                if (nextTarget === 'submit') {
-                    addExpense();
-                } else {
-                    document.getElementById(nextTarget).focus();
-                }
-            }
+    if (e.key === 'Enter') {
+        if (nextTarget === 'submit') {
+            addExpense(); // 儲存後會自動回到「餐飲 - 」狀態
+        } else {
+            document.getElementById(nextTarget).focus();
         }
+    }
+}
 
 function addExpense() {
     const date = document.getElementById('exp-date').value;
     const name = document.getElementById('exp-name').value;
     const amount = document.getElementById('exp-amount').value;
 
-    if (!name || !amount) return alert('請輸入項目與金額！');
+    if (!name || !amount) return alert('大雄，請輸入項目與金額喔！');
 
+    // 儲存資料
     STATE.expenses.push({ date, name, amount });
     localStorage.setItem('camino_exp_v2', JSON.stringify(STATE.expenses));
 
-    // 重繪畫面 (這會清空輸入框並更新列表)
+    // 1. 重新渲染畫面（這會刷新列表）
     renderExpenseTab();
     
-    // 關鍵修改：將焦點 Focus 回到「餐飲」分類按鈕
+    // 2. 關鍵：在 DOM 更新後，重新執行預填與強行 Focus
     setTimeout(() => {
-        // 抓取 id 為 "btn-cat-餐飲" 的按鈕
-        const diningBtn = document.getElementById('btn-cat-餐飲');
-        if (diningBtn) {
-            diningBtn.focus();
+        // 先執行填入文字的邏輯
+        prefillCategory('餐飲');
+        
+        // 確保輸入框被選中
+        const nameInput = document.getElementById('exp-name');
+        if (nameInput) {
+            nameInput.focus();
+            // 強制將游標移到最後面 (餐飲 - |)
+            const len = nameInput.value.length;
+            nameInput.setSelectionRange(len, len);
         }
-    }, 50);
+    }, 100); // 給瀏覽器一點點時間完成渲染
 }
         function deleteExpense(index) {
             if(confirm('確定要刪除這筆紀錄嗎？')) {
@@ -563,27 +589,43 @@ function addExpense() {
             }
         }
 
-        function exportCSV() {
-    // 1. 準備 CSV 內容
-    // 關鍵修正：在字串最前面加上 "\uFEFF" (BOM)，解決 Excel 中文亂碼問題
-    const csvContent = "\uFEFF" + "Date,Item,Amount(Euro)\n" 
-        + STATE.expenses.map(e => `${e.date},${e.name},${e.amount}`).join("\n");
-    
-    // 2. 轉換為 Blob 物件 (比原本的 encodeURI 更穩定)
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    
-    // 3. 建立下載連結
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", "camino_expenses.csv");
-    
-    // 4. 觸發點擊並清理
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
+       function exportCSV() {
+    try {
+        // 1. 準備內容 (BOM + 內容)
+        const csvContent = "\uFEFF" + "Date,Item,Amount(Euro)\n" 
+            + STATE.expenses.map(e => `${e.date},${e.name},${e.amount}`).join("\n");
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const fileName = "camino_expenses.csv";
 
+        // 2. 針對手機端下載的優化處理
+        if (navigator.msSaveBlob) { 
+            // 針對舊版 IE (防範萬一)
+            navigator.msSaveBlob(blob, fileName);
+        } else {
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            link.href = url;
+            link.setAttribute("download", fileName);
+            
+            // 關鍵修正：某些手機瀏覽器需要 link 出現在畫面上才能觸發
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            
+            link.click();
+            
+            // 延遲移除，確保下載動作已交給系統
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 100);
+        }
+    } catch (err) {
+        alert("匯出失敗，請嘗試使用 Chrome 或 Safari 瀏覽器打開網頁。");
+        console.error(err);
+    }
+}
         // ==========================================
         // 初始化
         // ==========================================
@@ -592,3 +634,4 @@ function addExpense() {
     </script>
 </body>
 </html>
+
