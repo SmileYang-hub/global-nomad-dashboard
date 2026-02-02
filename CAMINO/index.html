@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>哆啦A夢朝聖之路 App (Camino GO!)</title>
+    <title>哆啦A夢朝聖之路 (Camino GO!)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -15,30 +16,33 @@
             theme: {
                 extend: {
                     colors: {
-                        doraBlue: '#009BDE',
-                        doraRed: '#E4002B',
-                        bellYellow: '#F1C40F',
-                        bgSoft: '#F0F9FF',
+                        dora: {
+                            blue: '#009BDE',
+                            red: '#E4002B',
+                        },
+                        bell: {
+                            yellow: '#F1C40F'
+                        }
                     },
                     fontFamily: {
                         sans: ['Iansui', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '4xl': '2rem',
+                        '5xl': '2.5rem',
                     }
                 }
             }
         }
     </script>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
         body {
-            font-family: 'Iansui', sans-serif;
-            background-color: #F0F9FF;
+            background-color: #F0F9FF; /* 極淺藍背景 */
             -webkit-tap-highlight-color: transparent;
-            padding-bottom: 100px; /* Space for Bottom Nav */
-            padding-top: 110px; /* Space for Header */
+            padding-bottom: 100px; /* 避開底部導航 */
         }
 
         /* 玻璃擬態卡片 */
@@ -47,450 +51,476 @@
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
         }
 
-        /* 隱藏捲軸但保留功能 */
-        .hide-scrollbar::-webkit-scrollbar {
+        /* 隱藏 Scrollbar 但保持滑動 */
+        .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-        .hide-scrollbar {
+        .no-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
 
-        /* 平滑捲動 */
-        html {
-            scroll-behavior: smooth;
+        /* 下拉選單樣式優化 */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23009BDE' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 1rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
         }
         
-        /* 動畫 */
-        @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
+        /* 動畫效果 */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
         }
-        .animate-pop {
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body>
+<body class="text-slate-800">
 
-    <header class="fixed top-0 left-0 w-full z-50 bg-doraBlue rounded-b-[2rem] shadow-md p-4 flex items-center gap-3 transition-all duration-300">
-        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
-            <i data-lucide="footprints" class="text-doraBlue w-6 h-6"></i>
+    <header class="bg-dora-blue p-4 rounded-b-[2rem] shadow-md flex items-center justify-between gap-3 sticky top-0 z-50 transition-all">
+        <div class="flex items-center gap-3 flex-1">
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-sm">
+                <i data-lucide="footprints" class="text-dora-blue w-6 h-6"></i>
+            </div>
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-black text-white leading-none tracking-tight">Camino GO!</h1>
+                <p class="text-white/90 text-sm font-bold mt-0.5">Jiani，我們出發吧！</p>
+            </div>
         </div>
 
-        <div class="flex-1 min-w-0">
-            <h1 class="text-white text-2xl font-black tracking-wide leading-none">Camino GO!</h1>
-            <p class="text-white/90 text-sm font-bold truncate">Jiani，我們出發吧！</p>
-        </div>
-
-        <div class="relative w-14 h-14 rounded-full bg-doraBlue border-4 border-white shadow-lg flex items-center justify-center shrink-0">
-            <i data-lucide="bell" class="text-bellYellow fill-bellYellow w-7 h-7"></i>
-            <div class="absolute top-3 right-3 w-3 h-3 bg-doraRed rounded-full border-2 border-white shadow-sm"></div>
+        <div class="relative w-14 h-14 rounded-full bg-dora-blue border-4 border-white shadow-lg flex items-center justify-center shrink-0">
+            <i data-lucide="bell" class="text-bell-yellow fill-bell-yellow w-7 h-7"></i>
+            <div class="absolute top-3 right-3 w-3 h-3 bg-dora-red rounded-full border-2 border-white"></div>
         </div>
     </header>
 
-    <main id="app-container" class="px-4 w-full max-w-lg mx-auto">
-        
-        <section id="tab-route" class="animate-pop">
-            
-            <div class="glass-card rounded-[2rem] p-2 mb-6 shadow-sm">
-                <select id="stage-select" class="w-full bg-blue-50 text-blue-900 font-bold text-lg py-3 px-4 rounded-[1.5rem] focus:outline-none focus:ring-2 focus:ring-doraBlue appearance-none">
-                    <option value="" disabled selected>讀取中...</option>
-                </select>
-            </div>
-
-            <div id="hero-container" class="mb-8">
-                <div class="w-full h-64 relative rounded-[2rem] shadow-lg overflow-hidden bg-gray-200">
-                    <img id="hero-img" src="" alt="Stage Hero" class="w-full h-full object-cover">
-                    <div class="absolute bottom-6 left-6 max-w-[70%] z-10">
-                        <h2 id="hero-title" class="text-white text-3xl font-black leading-snug break-words drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
-                            </h2>
-                    </div>
-                </div>
-                
-                <div class="glass-card rounded-2xl p-5 mt-4">
-                    <p id="hero-desc" class="text-doraBlue font-bold text-base leading-relaxed">
-                        </p>
-                </div>
-            </div>
-
-            <div id="city-list" class="space-y-6">
-                </div>
-            
-            <div class="h-8"></div>
-        </section>
-
-
-        <section id="tab-toolkit" class="hidden animate-pop">
-            
-            <div class="grid grid-cols-4 gap-2 mb-8">
-                <button onclick="scrollToSection('cat-phrase')" class="flex flex-col items-center justify-center p-2 rounded-2xl bg-blue-100 active:scale-95 transition-transform">
-                    <i data-lucide="languages" class="w-6 h-6 text-blue-600 mb-1"></i>
-                    <span class="text-xs font-bold text-blue-800">翻譯</span>
-                </button>
-                <button onclick="scrollToSection('cat-sign')" class="flex flex-col items-center justify-center p-2 rounded-2xl bg-yellow-100 active:scale-95 transition-transform">
-                    <i data-lucide="signpost" class="w-6 h-6 text-yellow-600 mb-1"></i>
-                    <span class="text-xs font-bold text-yellow-800">標誌</span>
-                </button>
-                <button onclick="scrollToSection('cat-gear')" class="flex flex-col items-center justify-center p-2 rounded-2xl bg-green-100 active:scale-95 transition-transform">
-                    <i data-lucide="backpack" class="w-6 h-6 text-green-600 mb-1"></i>
-                    <span class="text-xs font-bold text-green-800">清單</span>
-                </button>
-                <button onclick="scrollToSection('cat-tip')" class="flex flex-col items-center justify-center p-2 rounded-2xl bg-red-100 active:scale-95 transition-transform">
-                    <i data-lucide="lightbulb" class="w-6 h-6 text-red-600 mb-1"></i>
-                    <span class="text-xs font-bold text-red-800">提醒</span>
-                </button>
-            </div>
-
-            <div id="toolkit-content" class="space-y-8">
-                </div>
-        </section>
-
-
-        <section id="tab-expense" class="hidden animate-pop">
-            
-            <div class="w-full bg-gradient-to-br from-emerald-400 to-teal-500 rounded-[2rem] p-6 shadow-lg text-white mb-6 relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-sm font-bold opacity-90 mb-1">總花費 Total</p>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-4xl font-black">€</span>
-                        <span id="total-eur" class="text-5xl font-black tracking-tight">0</span>
-                    </div>
-                    <p class="mt-2 text-emerald-50 font-bold text-lg">≈ NT$ <span id="total-twd">0</span></p>
-                </div>
-                <i data-lucide="wallet" class="absolute -bottom-4 -right-4 w-32 h-32 text-white opacity-20"></i>
-            </div>
-
-            <div class="glass-card rounded-[2rem] p-5 mb-6">
-                <div class="grid grid-cols-3 gap-3 mb-4">
-                    <button onclick="setExpCategory('住宿', 'bed-double')" class="exp-cat-btn flex flex-col items-center p-2 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
-                        <i data-lucide="bed-double" class="w-6 h-6 text-purple-600 mb-1"></i>
-                        <span class="text-xs font-bold text-gray-700">住宿</span>
-                    </button>
-                    <button onclick="setExpCategory('餐飲', 'utensils')" class="exp-cat-btn flex flex-col items-center p-2 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors">
-                        <i data-lucide="utensils" class="w-6 h-6 text-orange-600 mb-1"></i>
-                        <span class="text-xs font-bold text-gray-700">餐飲</span>
-                    </button>
-                    <button onclick="setExpCategory('交通', 'bus')" class="exp-cat-btn flex flex-col items-center p-2 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
-                        <i data-lucide="bus" class="w-6 h-6 text-blue-600 mb-1"></i>
-                        <span class="text-xs font-bold text-gray-700">交通</span>
-                    </button>
-                    <button onclick="setExpCategory('裝備', 'shopping-bag')" class="exp-cat-btn flex flex-col items-center p-2 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors">
-                        <i data-lucide="shopping-bag" class="w-6 h-6 text-pink-600 mb-1"></i>
-                        <span class="text-xs font-bold text-gray-700">裝備</span>
-                    </button>
-                    <button onclick="setExpCategory('門票', 'ticket')" class="exp-cat-btn flex flex-col items-center p-2 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors">
-                        <i data-lucide="ticket" class="w-6 h-6 text-yellow-600 mb-1"></i>
-                        <span class="text-xs font-bold text-gray-700">門票</span>
-                    </button>
-                    <button onclick="setExpCategory('其他', 'circle-ellipsis')" class="exp-cat-btn flex flex-col items-center p-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                        <i data-lucide="circle-ellipsis" class="w-6 h-6 text-gray-600 mb-1"></i>
-                        <span class="text-xs font-bold text-gray-700">其他</span>
-                    </button>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="flex gap-2">
-                        <input type="date" id="exp-date" class="w-1/3 bg-gray-50 rounded-xl px-3 py-2 text-sm font-bold text-gray-600 outline-none focus:ring-2 focus:ring-doraBlue">
-                        <input type="text" id="exp-name" placeholder="項目名稱" class="w-2/3 bg-gray-50 rounded-xl px-4 py-2 text-gray-800 font-bold outline-none focus:ring-2 focus:ring-doraBlue" onkeypress="handleEnter(event, 'exp-amount')">
-                    </div>
-                    <div class="flex gap-2 items-center">
-                        <span class="text-xl font-black text-gray-400">€</span>
-                        <input type="number" id="exp-amount" placeholder="0.00" step="0.01" class="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-2xl font-black text-gray-800 outline-none focus:ring-2 focus:ring-doraBlue" onkeypress="handleEnter(event, 'submit')">
-                        <button onclick="addExpense()" class="bg-doraBlue text-white p-3 rounded-full shadow-md active:scale-90 transition-transform">
-                            <i data-lucide="plus" class="w-6 h-6"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center mb-4 px-2">
-                <h3 class="text-xl font-black text-gray-700">近期紀錄</h3>
-                <button onclick="exportCSV()" class="text-sm font-bold text-doraBlue bg-white px-3 py-1 rounded-full shadow-sm border border-blue-100 flex items-center gap-1">
-                    <i data-lucide="download" class="w-4 h-4"></i> 匯出
-                </button>
-            </div>
-
-            <div id="expense-list" class="space-y-3 pb-8">
-                </div>
-        </section>
-
+    <main id="app-container" class="p-5 max-w-lg mx-auto">
+        <div class="text-center py-20 text-dora-blue">
+            <p class="text-xl font-bold animate-pulse">正在拿出任意門...</p>
+            <p class="text-sm mt-2 opacity-70">讀取 CSV 資料中</p>
+        </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 w-full h-[85px] bg-white border-t border-gray-100 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] z-50 rounded-t-[2rem]">
-        <div class="flex justify-around items-center h-full px-2 pb-2">
-            
-            <button onclick="switchTab('route')" class="nav-btn w-20 flex flex-col items-center justify-center gap-1 group active">
-                <div class="icon-box p-1.5 rounded-full transition-colors duration-300 group-[.active]:bg-blue-50">
-                    <i data-lucide="map" class="w-6 h-6 text-gray-400 transition-colors duration-300 group-[.active]:text-doraBlue group-[.active]:stroke-[3px]"></i>
-                </div>
-                <span class="text-xs font-bold text-gray-400 transition-colors duration-300 group-[.active]:text-doraBlue">行程</span>
-            </button>
+    <nav class="fixed bottom-0 left-0 w-full h-[80px] bg-white shadow-[0_-5px_15px_rgba(0,0,0,0.05)] rounded-t-[2rem] z-50 flex items-center justify-around px-2 border-t border-blue-50">
+        <button onclick="switchTab('route')" class="nav-btn group flex flex-col items-center gap-1 p-2 w-20 transition-all" id="btn-route">
+            <div class="w-10 h-10 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                <i data-lucide="map" class="w-6 h-6 text-gray-400 group-[.active]:text-dora-blue group-[.active]:fill-blue-100 transition-colors"></i>
+            </div>
+            <span class="text-xs font-bold text-gray-400 group-[.active]:text-dora-blue">行程</span>
+        </button>
+        
+        <button onclick="switchTab('toolkit')" class="nav-btn group flex flex-col items-center gap-1 p-2 w-20 transition-all" id="btn-toolkit">
+            <div class="w-10 h-10 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                <i data-lucide="briefcase" class="w-6 h-6 text-gray-400 group-[.active]:text-dora-blue group-[.active]:fill-blue-100 transition-colors"></i>
+            </div>
+            <span class="text-xs font-bold text-gray-400 group-[.active]:text-dora-blue">百寶袋</span>
+        </button>
 
-            <button onclick="switchTab('toolkit')" class="nav-btn w-20 flex flex-col items-center justify-center gap-1 group">
-                <div class="icon-box p-1.5 rounded-full transition-colors duration-300 group-[.active]:bg-blue-50">
-                    <i data-lucide="briefcase" class="w-6 h-6 text-gray-400 transition-colors duration-300 group-[.active]:text-doraBlue group-[.active]:stroke-[3px]"></i>
-                </div>
-                <span class="text-xs font-bold text-gray-400 transition-colors duration-300 group-[.active]:text-doraBlue">百寶袋</span>
-            </button>
-
-            <button onclick="switchTab('expense')" class="nav-btn w-20 flex flex-col items-center justify-center gap-1 group">
-                <div class="icon-box p-1.5 rounded-full transition-colors duration-300 group-[.active]:bg-blue-50">
-                    <i data-lucide="coins" class="w-6 h-6 text-gray-400 transition-colors duration-300 group-[.active]:text-doraBlue group-[.active]:stroke-[3px]"></i>
-                </div>
-                <span class="text-xs font-bold text-gray-400 transition-colors duration-300 group-[.active]:text-doraBlue">記帳</span>
-            </button>
-
-        </div>
+        <button onclick="switchTab('expense')" class="nav-btn group flex flex-col items-center gap-1 p-2 w-20 transition-all" id="btn-expense">
+            <div class="w-10 h-10 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                <i data-lucide="wallet" class="w-6 h-6 text-gray-400 group-[.active]:text-dora-blue group-[.active]:fill-blue-100 transition-colors"></i>
+            </div>
+            <span class="text-xs font-bold text-gray-400 group-[.active]:text-dora-blue">記帳</span>
+        </button>
     </nav>
 
     <script>
-        // --- 1. 全域變數 ---
-        let stagesData = [];
-        let itineraryData = [];
-        let toolkitData = [];
-        let expenseData = JSON.parse(localStorage.getItem('camino_exp_v2')) || [];
-        const EX_RATE = 35.5;
+        // ==========================================
+        // 0. 全域變數與狀態
+        // ==========================================
+        const STATE = {
+            currentTab: 'route',
+            currentStageId: '1',
+            stages: [],
+            itinerary: [],
+            toolkit: [],
+            expenses: JSON.parse(localStorage.getItem('camino_exp_v2')) || []
+        };
 
-        // --- 2. 初始化與資料讀取引擎 (Data Engine) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            initDataEngine();
-            initExpense();
-        });
+        const REFS = {
+            container: document.getElementById('app-container'),
+            navBtns: document.querySelectorAll('.nav-btn')
+        };
 
-        async function initDataEngine() {
-            const files = ['camino_stages.csv', 'camino_itinerary.csv', 'camino_toolkit.csv'];
-            
+        // ==========================================
+        // 1. 資料讀取引擎 (Data Engine)
+        // ==========================================
+        async function initApp() {
             try {
-                // 平行讀取所有檔案
-                const responses = await Promise.all(files.map(f => fetch(f).then(res => res.text())));
-                
-                // 資料清洗與解析
-                const cleanAndParse = (text) => {
-                    // 關鍵清洗：移除多餘引號
-                    const cleanText = text.replace(/^"|"$/gm, '').trim(); 
-                    return Papa.parse(cleanText, { header: true, skipEmptyLines: true }).data;
+                // 定義 Fetch 與 Clean 函式
+                const fetchData = async (file) => {
+                    const response = await fetch(file);
+                    let text = await response.text();
+                    // CRITICAL: 清洗 Excel 轉 CSV 可能產生的多餘引號
+                    text = text.replace(/^"|"$/gm, '').trim(); 
+                    return new Promise((resolve) => {
+                        Papa.parse(text, {
+                            header: true,
+                            skipEmptyLines: true,
+                            complete: (results) => resolve(results.data)
+                        });
+                    });
                 };
 
-                stagesData = cleanAndParse(responses[0]);
-                itineraryData = cleanAndParse(responses[1]);
-                toolkitData = cleanAndParse(responses[2]);
+                // Promise.all 同時讀取
+                const [stages, itinerary, toolkit] = await Promise.all([
+                    fetchData('camino_stages.csv'),
+                    fetchData('camino_itinerary.csv'),
+                    fetchData('camino_toolkit.csv')
+                ]);
 
-                console.log("Data Loaded:", {stagesData, itineraryData, toolkitData});
+                STATE.stages = stages;
+                STATE.itinerary = itinerary;
+                STATE.toolkit = toolkit;
 
-                // 資料載入後的初次渲染
-                renderStageSelector();
-                renderToolkit();
-                
+                // 初始化完畢，渲染預設頁面
+                renderRouteTab();
+                updateNavState();
+
             } catch (error) {
-                console.error("Data Load Error:", error);
-                alert("資料讀取失敗，請確認 CSV 檔案存在且格式正確。");
+                console.error("Data Engine Error:", error);
+                REFS.container.innerHTML = `
+                    <div class="text-center p-10">
+                        <p class="text-dora-red font-bold text-xl">大雄，資料讀取失敗了！</p>
+                        <p class="text-gray-500 mt-2">${error.message}</p>
+                    </div>
+                `;
             }
         }
 
-        // --- 3. 核心功能：導航與切換 ---
+        // ==========================================
+        // 2. 頁面切換邏輯
+        // ==========================================
         function switchTab(tabName) {
-            // 隱藏所有 Section
-            document.querySelectorAll('section').forEach(el => el.classList.add('hidden'));
-            // 移除導航按鈕 Active 狀態
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            STATE.currentTab = tabName;
+            updateNavState();
+            
+            // 捲動回頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // 顯示目標 Section
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            
-            // 設定導航按鈕 Active
-            const navIndex = ['route', 'toolkit', 'expense'].indexOf(tabName);
-            document.querySelectorAll('.nav-btn')[navIndex].classList.add('active');
-            
-            // 重新整理 Icon
+            if (tabName === 'route') renderRouteTab();
+            else if (tabName === 'toolkit') renderToolkitTab();
+            else if (tabName === 'expense') renderExpenseTab();
+        }
+
+        function updateNavState() {
+            REFS.navBtns.forEach(btn => {
+                if (btn.id === `btn-${STATE.currentTab}`) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
             lucide.createIcons();
-            window.scrollTo(0,0);
         }
 
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- 4. 功能：行程 (Route) ---
-        function renderStageSelector() {
-            const selector = document.getElementById('stage-select');
-            selector.innerHTML = `<option value="" disabled selected>請選擇一個階段...</option>`;
+        // ==========================================
+        // 3. 第一分頁：行程 (Route)
+        // ==========================================
+        function renderRouteTab() {
+            // A. 找出目前 Stage 的資料
+            const currentStageData = STATE.stages.find(s => s.ID == STATE.currentStageId) || STATE.stages[0];
             
-            stagesData.forEach(stage => {
-                const opt = document.createElement('option');
-                opt.value = stage.ID;
-                opt.textContent = stage.Title;
-                selector.appendChild(opt);
-            });
+            // B. 篩選城市卡片 (Filter Loop)
+            const currentCities = STATE.itinerary.filter(c => c.StageID == STATE.currentStageId);
 
-            // 監聽變更
-            selector.addEventListener('change', (e) => {
-                renderStageContent(e.target.value);
-            });
-
-            // 預設選擇第一項 (如果有的話)
-            if (stagesData.length > 0) {
-                selector.value = stagesData[0].ID;
-                renderStageContent(stagesData[0].ID);
-            }
-        }
-
-        function renderStageContent(stageId) {
-            const stage = stagesData.find(s => s.ID === stageId);
-            if (!stage) return;
-
-            // Update Hero
-            document.getElementById('hero-img').src = `img/s${stageId}_hero.jpg`;
-            // Fallback 假圖，避免找不到圖時破圖 (實際開發請移除或確保圖片存在)
-            document.getElementById('hero-img').onerror = function() {
-                this.src = 'https://via.placeholder.com/800x600/009BDE/FFFFFF?text=Doraemon+Camino'; 
-            };
-            
-            document.getElementById('hero-title').textContent = stage.Title;
-            document.getElementById('hero-desc').innerHTML = `📝 ${stage.Description}`;
-
-            // Filter & Render Cities
-            const cities = itineraryData.filter(item => item.StageID === stageId);
-            const cityList = document.getElementById('city-list');
-            cityList.innerHTML = '';
-
-            cities.forEach(city => {
-                // Tips Logic
-                let tipsHtml = '';
-                if (city.Tip1) tipsHtml += `<span class="inline-block bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded-lg border border-blue-100">${city.Tip1}</span>`;
-                if (city.Tip2) tipsHtml += `<span class="inline-block bg-pink-50 text-pink-700 text-xs font-bold px-2 py-1 rounded-lg border border-pink-100">${city.Tip2}</span>`;
-                if (city.Tip3) tipsHtml += `<span class="inline-block bg-yellow-50 text-yellow-700 text-xs font-bold px-2 py-1 rounded-lg border border-yellow-100">${city.Tip3}</span>`;
-
-                const card = `
-                    <div class="glass-card rounded-[2.5rem] p-6 relative overflow-visible">
-                        <div onclick="scrollToTop()" class="absolute top-0 right-0 bg-doraBlue text-white font-black text-xl px-4 py-2 rounded-bl-[2rem] rounded-tr-[2.5rem] shadow-md cursor-pointer active:scale-95 transition-transform z-10">
-                            ${city.CityNo}
-                        </div>
-
-                        <div class="mb-4 mt-2">
-                            <h3 class="text-3xl font-black text-gray-900 break-words hyphens-auto pr-16 leading-tight mb-1">
-                                ${city.CityEN}
-                            </h3>
-                            <h4 class="text-lg font-bold text-gray-400">${city.CityCN}</h4>
-                        </div>
-
-                        <p class="text-gray-600 font-medium leading-relaxed mb-4">
-                            ${city.Description}
-                        </p>
-
-                        <div class="flex flex-wrap gap-2 mb-6">
-                            ${tipsHtml}
-                        </div>
-
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(city.CityEN)}" target="_blank" 
-                           class="flex items-center justify-center w-full bg-doraRed text-white font-bold py-3 rounded-full shadow-md active:scale-95 transition-transform">
-                             <i data-lucide="map-pin" class="w-5 h-5 mr-2"></i> 開啟任意門
-                        </a>
+            let html = `
+                <div class="flex flex-col gap-6 fade-in pb-10">
+                    
+                    <div class="glass-card rounded-[2rem] p-2 shadow-sm">
+                        <select id="stageSelector" onchange="handleStageChange(this.value)" 
+                            class="w-full bg-blue-50 text-blue-900 font-bold p-4 rounded-[1.5rem] outline-none text-lg">
+                            ${STATE.stages.map(s => 
+                                `<option value="${s.ID}" ${s.ID == STATE.currentStageId ? 'selected' : ''}>${s.Title}</option>`
+                            ).join('')}
+                        </select>
                     </div>
-                `;
-                cityList.innerHTML += card;
-            });
+
+                    <div class="flex flex-col gap-4">
+                        <div class="w-full h-64 relative rounded-[2rem] overflow-hidden shadow-lg bg-gray-200">
+                            <img src="img/s${STATE.currentStageId}_hero.jpg" 
+                                 onerror="this.src='https://placehold.co/600x400/009BDE/FFFFFF?text=Camino+Stage+${STATE.currentStageId}'"
+                                 class="w-full h-full object-cover" alt="Stage Hero">
+                            
+                            <div class="absolute bottom-6 left-6 max-w-[70%] z-10">
+                                <h2 class="text-white text-3xl font-black leading-snug break-words drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+                                    ${currentStageData.Title}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-2xl">
+                            <p class="text-dora-blue font-bold leading-relaxed">
+                                📝 ${currentStageData.Description}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="border-b-2 border-dashed border-blue-200 my-2"></div>
+
+                    <div class="flex flex-col gap-8">
+                        ${currentCities.map(city => renderCityCard(city)).join('')}
+                    </div>
+                </div>
+            `;
+
+            REFS.container.innerHTML = html;
             lucide.createIcons();
         }
 
-        // --- 5. 功能：百寶袋 (Toolkit) ---
-        function renderToolkit() {
-            const container = document.getElementById('toolkit-content');
-            container.innerHTML = '';
-            
+        function handleStageChange(newId) {
+            STATE.currentStageId = newId;
+            renderRouteTab();
+        }
+
+        function renderCityCard(city) {
+            // Tips 條件渲染
+            const tipsHtml = [
+                { val: city.Tip1, bg: 'bg-blue-50', text: 'text-blue-700' },
+                { val: city.Tip2, bg: 'bg-pink-50', text: 'text-pink-700' },
+                { val: city.Tip3, bg: 'bg-yellow-50', text: 'text-yellow-700' }
+            ].filter(t => t.val).map(t => `
+                <div class="${t.bg} ${t.text} px-3 py-2 rounded-xl text-sm font-bold shadow-sm">
+                    ${t.val}
+                </div>
+            `).join('');
+
+            return `
+                <div class="glass-card rounded-[2.5rem] p-6 relative flex flex-col gap-4 shadow-md transition-transform active:scale-[0.99]">
+                    <div onclick="scrollToTop()" class="absolute top-0 right-0 bg-dora-blue text-white px-5 py-3 rounded-bl-[2rem] rounded-tr-[2.5rem] font-black text-xl shadow-md cursor-pointer active:bg-blue-600">
+                        ${city.CityNo}
+                    </div>
+
+                    <div class="mt-2 pr-16">
+                        <h3 class="text-3xl font-black text-slate-900 break-words hyphens-auto leading-tight mb-1">
+                            ${city.CityEN}
+                        </h3>
+                        <h4 class="text-lg font-bold text-gray-400">
+                            ${city.CityCN}
+                        </h4>
+                    </div>
+
+                    <p class="text-gray-600 leading-relaxed font-medium">
+                        ${city.Description}
+                    </p>
+
+                    ${tipsHtml ? `<div class="flex flex-wrap gap-2 mt-1">${tipsHtml}</div>` : ''}
+
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(city.CityEN)}" 
+                       target="_blank"
+                       class="mt-2 bg-dora-red text-white py-4 rounded-full flex items-center justify-center gap-2 font-black shadow-lg shadow-red-200 active:scale-95 transition-transform no-underline">
+                        <i data-lucide="map-pin" class="w-5 h-5"></i>
+                        <span>🗺️ 開啟任意門</span>
+                    </a>
+                </div>
+            `;
+        }
+
+
+        // ==========================================
+        // 4. 第二分頁：百寶袋 (Toolkit)
+        // ==========================================
+        function renderToolkitTab() {
             const categories = [
-                { key: 'phrase', title: '翻譯 Phrase', icon: 'languages', color: 'text-blue-500' },
-                { key: 'sign', title: '標誌 Sign', icon: 'signpost', color: 'text-yellow-500' },
-                { key: 'gear', title: '清單 Gear', icon: 'backpack', color: 'text-green-500' },
-                { key: 'tip', title: '提醒 Tip', icon: 'lightbulb', color: 'text-red-500' }
+                { key: 'phrase', title: '常用西語', icon: 'languages', color: 'blue' },
+                { key: 'sign', title: '路標識別', icon: 'signpost', color: 'yellow' },
+                { key: 'gear', title: '裝備檢查', icon: 'backpack', color: 'green' },
+                { key: 'tip', title: '實用建議', icon: 'lightbulb', color: 'red' }
             ];
 
-            categories.forEach(cat => {
-                const items = toolkitData.filter(i => i.Category === cat.key);
-                if (items.length === 0) return;
+            const colorMap = {
+                blue: { bg: 'bg-blue-100', text: 'text-blue-600', border: 'border-blue-500' },
+                yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600', border: 'border-yellow-500' },
+                green: { bg: 'bg-green-100', text: 'text-green-600', border: 'border-green-500' },
+                red: { bg: 'bg-red-100', text: 'text-red-600', border: 'border-red-500' }
+            };
 
-                // Category Header
-                const sectionId = `cat-${cat.key}`;
-                const sectionHtml = `
-                    <div id="${sectionId}" class="scroll-mt-28">
-                        <h3 onclick="scrollToTop()" class="text-xl font-black text-gray-800 mb-4 pl-3 border-l-4 border-doraBlue cursor-pointer">
+            let navGridHtml = `
+                <div class="grid grid-cols-4 gap-2 mb-8">
+                    ${categories.map(cat => {
+                        const style = colorMap[cat.color];
+                        return `
+                        <button onclick="document.getElementById('cat-${cat.key}').scrollIntoView({behavior: 'smooth', block: 'start'})"
+                            class="${style.bg} ${style.text} flex flex-col items-center justify-center p-3 rounded-2xl gap-1 active:scale-90 transition-transform shadow-sm h-20">
+                            <i data-lucide="${cat.icon}" class="w-6 h-6"></i>
+                            <span class="text-xs font-bold">${cat.title}</span>
+                        </button>`;
+                    }).join('')}
+                </div>
+            `;
+
+            let contentHtml = categories.map(cat => {
+                const items = STATE.toolkit.filter(item => item.Category === cat.key);
+                if (items.length === 0) return '';
+
+                return `
+                    <div id="cat-${cat.key}" class="mb-8 scroll-mt-24">
+                        <h3 onclick="scrollToTop()" class="text-xl font-black text-slate-800 mb-4 pl-4 border-l-4 border-dora-blue cursor-pointer">
                             ${cat.title}
                         </h3>
-                        <div class="space-y-4">
-                            ${items.map(item => createToolkitCard(item, cat.key)).join('')}
+                        <div class="flex flex-col gap-3">
+                            ${items.map(item => renderToolkitItem(item, cat.key)).join('')}
                         </div>
                     </div>
                 `;
-                container.innerHTML += sectionHtml;
-            });
+            }).join('');
+
+            REFS.container.innerHTML = `<div class="fade-in">${navGridHtml}${contentHtml}</div>`;
             lucide.createIcons();
         }
 
-        function createToolkitCard(item, catKey) {
+        function renderToolkitItem(item, categoryKey) {
+            // 右側功能區邏輯
             let actionHtml = '';
-            
-            if (catKey === 'phrase') {
+            if (categoryKey === 'phrase') {
                 actionHtml = `
-                    <button onclick="speak('${item.Title}', '${item.Note || 'es-ES'}')" class="shrink-0 w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 active:scale-90 transition-transform">
+                    <button onclick="speakText('${item.Title}')" class="shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 active:bg-blue-200 active:scale-90 transition-all">
                         <i data-lucide="volume-2" class="w-6 h-6"></i>
                     </button>
                 `;
-            } else if (catKey === 'gear') {
+            } else if (categoryKey === 'gear') {
                 actionHtml = `
                     <div class="shrink-0">
-                        <input type="checkbox" class="w-6 h-6 rounded-md text-green-500 focus:ring-green-500 border-gray-300">
+                        <input type="checkbox" class="w-8 h-8 rounded-lg text-green-500 focus:ring-green-500 border-gray-300">
                     </div>
                 `;
             }
 
-            // 防止文字消失: flex-1 min-w-0 break-words whitespace-normal
             return `
-                <div class="bg-white p-5 rounded-[1.5rem] flex items-center gap-4 shadow-sm border border-gray-100">
-                    <span class="text-3xl shrink-0">${item.ItemIcon}</span>
-                    <div class="flex-1 min-w-0"> 
-                        <p class="text-xl font-black text-gray-800 leading-tight break-words whitespace-normal mb-1">${item.Title}</p>
-                        <p class="text-sm font-bold text-gray-400 break-words whitespace-normal">${item.Subtitle}</p>
+                <div class="bg-white rounded-[1.5rem] p-5 flex items-center gap-4 shadow-sm border border-blue-50/50">
+                    <div class="text-3xl shrink-0">${item.ItemIcon}</div>
+                    
+                    <div class="flex-1 min-w-0 flex flex-col gap-1">
+                        <p class="text-lg font-black text-slate-800 break-words whitespace-normal leading-tight">
+                            ${item.Title}
+                        </p>
+                        <p class="text-sm font-bold text-gray-400 break-words whitespace-normal">
+                            ${item.Subtitle}
+                        </p>
                     </div>
+
                     ${actionHtml}
                 </div>
             `;
         }
 
-        function scrollToSection(id) {
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        function speakText(text) {
+            // 簡單 TTS
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES'; // 假設是西語
+            window.speechSynthesis.speak(utterance);
         }
 
-        function speak(text, lang) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = lang || 'es-ES';
-                window.speechSynthesis.speak(utterance);
-            } else {
-                alert("您的瀏覽器不支援語音朗讀。");
-            }
-        }
 
-        // --- 6. 功能：記帳 (Expense) ---
-        function initExpense() {
+        // ==========================================
+        // 5. 第三分頁：記帳 (Expense)
+        // ==========================================
+        function renderExpenseTab() {
+            // 計算總額
+            const totalEuro = STATE.expenses.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const totalTWD = Math.round(totalEuro * 35.5);
+
+            // 分類定義
+            const categories = [
+                { name: '住宿', icon: 'bed', color: 'bg-blue-100 text-blue-600' },
+                { name: '餐飲', icon: 'utensils', color: 'bg-orange-100 text-orange-600' },
+                { name: '交通', icon: 'bus', color: 'bg-green-100 text-green-600' },
+                { name: '裝備', icon: 'backpack', color: 'bg-purple-100 text-purple-600' },
+                { name: '門票', icon: 'ticket', color: 'bg-pink-100 text-pink-600' },
+                { name: '其他', icon: 'more-horizontal', color: 'bg-gray-100 text-gray-600' }
+            ];
+
+            let html = `
+                <div class="flex flex-col gap-6 fade-in pb-10">
+                    <div class="bg-gradient-to-br from-emerald-400 to-teal-600 rounded-[2rem] p-6 text-white shadow-lg relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/20 rounded-full blur-xl"></div>
+                        <p class="text-emerald-100 font-bold mb-1">總支出 (Total)</p>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-4xl font-black">€${totalEuro.toFixed(2)}</span>
+                            <span class="text-lg opacity-80">≈ NT$${totalTWD}</span>
+                        </div>
+                    </div>
+
+<div class="grid grid-cols-3 gap-3">
+    ${categories.map(c => `
+        <button 
+            id="btn-cat-${c.name}" 
+            onclick="prefillCategory('${c.name}')" 
+            class="${c.color} p-3 rounded-2xl flex flex-col items-center gap-1 shadow-sm active:scale-95 transition-transform focus:ring-2 focus:ring-offset-2 focus:ring-dora-blue outline-none">
+            <i data-lucide="${c.icon}" class="w-6 h-6"></i>
+            <span class="text-xs font-bold text-black">${c.name}</span>
+        </button>
+    `).join('')}
+</div>
+
+
+                    <div class="glass-card p-5 rounded-[2rem] flex flex-col gap-3">
+                        <div class="flex gap-2">
+                            <input type="date" id="exp-date" class="w-1/3 bg-gray-50 rounded-xl px-3 py-3 text-sm font-bold outline-none border border-transparent focus:border-dora-blue text-center">
+                            <input type="text" id="exp-name" placeholder="項目名稱" class="flex-1 bg-gray-50 rounded-xl px-4 py-3 font-bold outline-none border border-transparent focus:border-dora-blue" onkeypress="handleEnter(event, 'exp-amount')">
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="number" id="exp-amount" placeholder="金額 (€)" class="flex-1 bg-gray-50 rounded-xl px-4 py-3 font-bold outline-none border border-transparent focus:border-dora-blue text-xl" onkeypress="handleEnter(event, 'submit')">
+                            <button onclick="addExpense()" class="bg-dora-blue text-white px-6 rounded-xl font-black shadow-md active:bg-blue-600">
+                                <i data-lucide="plus" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-3">
+                        <div class="flex justify-between items-end px-2">
+                            <h3 class="font-black text-xl text-slate-800">消費紀錄</h3>
+                            <button onclick="exportCSV()" class="text-xs font-bold text-gray-400 underline">匯出 CSV</button>
+                        </div>
+                        
+                        <div id="expense-list" class="flex flex-col gap-3">
+                            ${STATE.expenses.length === 0 ? '<p class="text-center text-gray-400 py-4">目前沒有紀錄喔！</p>' : 
+                                STATE.expenses.slice().reverse().map((item, index) => {
+                                    // 為了刪除方便，用反向 index 對應原始陣列有點麻煩，這裡用 timestamp 當 id 更穩，但簡化起見直接重繪
+                                    const realIndex = STATE.expenses.length - 1 - index;
+                                    return `
+                                    <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between border border-gray-100">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs text-gray-400 font-bold">${item.date}</span>
+                                            <span class="font-black text-slate-800 text-lg">${item.name}</span>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xl font-black text-dora-blue">€${item.amount}</span>
+                                            <button onclick="deleteExpense(${realIndex})" class="text-red-300 hover:text-red-500">
+                                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    `
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            REFS.container.innerHTML = html;
+            
             // 設定預設日期為今天
             document.getElementById('exp-date').valueAsDate = new Date();
-            renderExpenseList();
+            lucide.createIcons();
         }
 
-        function setExpCategory(name, iconName) {
+        function prefillCategory(catName) {
             const nameInput = document.getElementById('exp-name');
-            nameInput.value = name + "-";
-            nameInput.focus();
-            // 嘗試將游標移到最後
-            // setTimeout(() => nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length), 0);
-            
-            // 根據需求：點擊後若要直接輸入金額，可以把 focus 改為 amountInput
-             document.getElementById('exp-amount').focus();
+            nameInput.value = catName + " - ";
+            nameInput.focus(); // Focus 輸入框讓使用者繼續打字
         }
 
         function handleEnter(e, nextTarget) {
@@ -503,93 +533,61 @@
             }
         }
 
-        function addExpense() {
-            const date = document.getElementById('exp-date').value;
-            const name = document.getElementById('exp-name').value;
-            const amount = parseFloat(document.getElementById('exp-amount').value);
+function addExpense() {
+    const date = document.getElementById('exp-date').value;
+    const name = document.getElementById('exp-name').value;
+    const amount = document.getElementById('exp-amount').value;
 
-            if (!date || !name || isNaN(amount)) {
-                alert("請完整輸入日期、項目與金額");
-                return;
+    if (!name || !amount) return alert('請輸入項目與金額！');
+
+    STATE.expenses.push({ date, name, amount });
+    localStorage.setItem('camino_exp_v2', JSON.stringify(STATE.expenses));
+
+    // 重繪畫面 (這會清空輸入框並更新列表)
+    renderExpenseTab();
+    
+    // 關鍵修改：將焦點 Focus 回到「餐飲」分類按鈕
+    setTimeout(() => {
+        // 抓取 id 為 "btn-cat-餐飲" 的按鈕
+        const diningBtn = document.getElementById('btn-cat-餐飲');
+        if (diningBtn) {
+            diningBtn.focus();
+        }
+    }, 50);
+}
+        function deleteExpense(index) {
+            if(confirm('確定要刪除這筆紀錄嗎？')) {
+                STATE.expenses.splice(index, 1);
+                localStorage.setItem('camino_exp_v2', JSON.stringify(STATE.expenses));
+                renderExpenseTab();
             }
-
-            const newExp = {
-                id: Date.now(),
-                date,
-                name,
-                amount
-            };
-
-            expenseData.unshift(newExp); // 加到最前面
-            localStorage.setItem('camino_exp_v2', JSON.stringify(expenseData));
-
-            // Reset UI
-            document.getElementById('exp-name').value = '';
-            document.getElementById('exp-amount').value = '';
-            
-            // Focus logic: 回到項目輸入框 (為了連續輸入方便)
-            // 或者是回到 "餐飲" 分類按鈕的邏輯 (這有點難以直接對應 DOM focus，這裡選擇 focus nameInput)
-            document.getElementById('exp-name').focus();
-
-            renderExpenseList();
-        }
-
-        function deleteExpense(id) {
-            if(!confirm("確定要刪除這筆紀錄嗎？")) return;
-            expenseData = expenseData.filter(item => item.id !== id);
-            localStorage.setItem('camino_exp_v2', JSON.stringify(expenseData));
-            renderExpenseList();
-        }
-
-        function renderExpenseList() {
-            const list = document.getElementById('expense-list');
-            list.innerHTML = '';
-            
-            let totalEur = 0;
-
-            expenseData.forEach(item => {
-                totalEur += item.amount;
-                const itemHtml = `
-                    <div class="bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm border border-gray-50">
-                        <div>
-                            <p class="text-xs font-bold text-gray-400 mb-1">${item.date}</p>
-                            <p class="text-base font-black text-gray-800">${item.name}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-lg font-bold text-doraBlue">€${item.amount.toFixed(2)}</span>
-                            <button onclick="deleteExpense(${item.id})" class="text-gray-300 hover:text-red-500 transition-colors">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                list.innerHTML += itemHtml;
-            });
-
-            // Update Total Card
-            document.getElementById('total-eur').textContent = totalEur.toFixed(2);
-            document.getElementById('total-twd').textContent = Math.round(totalEur * EX_RATE).toLocaleString();
-            
-            lucide.createIcons();
         }
 
         function exportCSV() {
-            if (expenseData.length === 0) {
-                alert("沒有資料可匯出");
-                return;
-            }
-            const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
-                + "Date,Item,Amount(EUR)\n"
-                + expenseData.map(e => `${e.date},${e.name},${e.amount}`).join("\n");
-            
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "camino_expenses.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+    // 1. 準備 CSV 內容
+    // 關鍵修正：在字串最前面加上 "\uFEFF" (BOM)，解決 Excel 中文亂碼問題
+    const csvContent = "\uFEFF" + "Date,Item,Amount(Euro)\n" 
+        + STATE.expenses.map(e => `${e.date},${e.name},${e.amount}`).join("\n");
+    
+    // 2. 轉換為 Blob 物件 (比原本的 encodeURI 更穩定)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // 3. 建立下載連結
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "camino_expenses.csv");
+    
+    // 4. 觸發點擊並清理
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+        // ==========================================
+        // 初始化
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', initApp);
 
     </script>
 </body>
