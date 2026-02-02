@@ -462,34 +462,34 @@
 
            
 
-<div class="glass-card p-4 rounded-[2rem] flex flex-col gap-3 shadow-inner bg-white/50">
+<div class="glass-card p-6 rounded-[2rem] flex flex-col gap-6 shadow-xl bg-white border-2 border-dora-blue/10">
                 
-                <div class="flex w-full gap-2">
-                    <div style="width: 48%;">
-                        <label class=" text-l font-bold text-dora-blue ml-2 mb-1 block"> 📅日期</label>
+                <div class="flex w-full gap-4">
+                    <div style="width: 45%;">
+                        <label class="text-lg font-black text-slate-700 ml-1 mb-2 block">📅 日期</label>
                         <input type="date" id="exp-date" 
-                            class="w-full bg-gray-50 rounded-xl px-2 py-3 text-[11px] font-bold outline-none border-2 border-transparent focus:border-dora-blue appearance-none">
+                            class="w-full bg-gray-100 rounded-2xl px-3 py-4 text-base font-bold outline-none border-2 border-transparent focus:border-dora-blue appearance-none shadow-sm">
                     </div>
-                    <div style="width: 52%;">
-                         <label class=" text-l  font-bold text-dora-blue ml-2 mb-1 block"> 📝 項目</label>
-                        <input type="text" id="exp-name" placeholder="名稱" 
-                            class="w-full bg-gray-50 rounded-xl px-3 py-3 text-sm font-bold outline-none border-2 border-transparent focus:border-dora-blue" 
+                    <div style="width: 55%;">
+                        <label class="text-lg font-black text-slate-700 ml-1 mb-2 block">📝 項目名稱</label>
+                        <input type="text" id="exp-name" placeholder="輸入項目" 
+                            class="w-full bg-gray-100 rounded-2xl px-4 py-4 text-xl font-black outline-none border-2 border-transparent focus:border-dora-blue shadow-sm" 
                             onkeypress="handleEnter(event, 'exp-amount')">
                     </div>
                 </div>
 
-                <div class="flex w-full gap-2">
-                    <div style="width: 48%;">
-                        <label class="text-l font-bold text-dora-blue ml-2 mb-1 block">💰 金額 (€)</label>
+                <div class="flex w-full gap-4">
+                    <div style="width: 45%;">
+                        <label class="text-lg font-black text-slate-700 ml-1 mb-2 block">💰 金額(€)</label>
                         <input type="number" id="exp-amount" inputmode="decimal" step="0.01" placeholder="0.00" 
-                            class="w-full bg-gray-50 rounded-xl px-3 py-3 font-black outline-none border-2 border-transparent focus:border-dora-blue text-lg" 
+                            class="w-full bg-gray-100 rounded-2xl px-4 py-4 font-black outline-none border-2 border-transparent focus:border-dora-blue text-3xl text-dora-blue shadow-sm" 
                             onkeypress="handleEnter(event, 'submit')">
                     </div>
-                    <div style="width: 52%;" class="flex flex-col">
-                        
-                        <button onclick="addExpense()" class="w-full h-[52px] bg-dora-blue text-white rounded-xl flex items-center justify-center gap-1 shadow-md active:scale-95 transition-transform font-black">
-                            <i data-lucide="plus" class="w-5 h-5"></i>
-                            <span class="text-sm">新增</span>
+                    <div style="width: 55%;" class="flex flex-col">
+                        <label class="text-lg font-transparent opacity-0 mb-2 block">.</label>
+                        <button onclick="addExpense()" class="w-full h-[72px] bg-dora-blue text-white rounded-2xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-transform font-black">
+                            <i data-lucide="plus" class="w-8 h-8"></i>
+                            <span class="text-2xl">新增</span>
                         </button>
                     </div>
                 </div>
