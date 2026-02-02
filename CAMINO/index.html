@@ -460,26 +460,38 @@
                 `).join('')}
             </div>
 
-            <div class="glass-card p-5 rounded-[2rem] flex flex-col gap-4">
-                <input type="date" id="exp-date" class="w-full bg-gray-50 rounded-xl px-4 py-3 text-base font-bold outline-none border border-transparent focus:border-dora-blue">
-                
-                <input type="text" id="exp-name" placeholder="項目名稱" 
-                    class="w-full bg-gray-50 rounded-xl px-4 py-3 font-bold outline-none border border-transparent focus:border-dora-blue" 
-                    onkeypress="handleEnter(event, 'exp-amount')">
-                
-                <div class="flex gap-2">
-                    <input type="number" id="exp-amount" inputmode="decimal" step="0.01" placeholder="金額 (€)" 
-                        class="flex-1 bg-gray-50 rounded-xl px-4 py-3 font-bold outline-none border border-transparent focus:border-dora-blue text-xl" 
-                        onkeypress="handleEnter(event, 'submit')">
-                    
-                    <button onclick="addExpense()" class="bg-dora-blue text-white px-6 rounded-xl font-black shadow-md active:bg-blue-600 shrink-0">
-                        <i data-lucide="plus" class="w-6 h-6"></i>
-                    </button>
-                </div>
-            </div>
+           
+
+<div class="glass-card p-5 rounded-[2rem] flex flex-col gap-3 shadow-inner">
+    <div class="w-full">
+        <label class="text-xs font-bold text-dora-blue ml-2 mb-1 block">日期</label>
+        <input type="date" id="exp-date" 
+            class="w-full bg-gray-50 rounded-2xl px-4 py-3 text-base font-bold outline-none border-2 border-transparent focus:border-dora-blue appearance-none">
+    </div>
+
+    <div class="w-full">
+        <label class="text-xs font-bold text-dora-blue ml-2 mb-1 block">消費項目</label>
+        <input type="text" id="exp-name" placeholder="例如：晚餐、咖啡..." 
+            class="w-full bg-gray-50 rounded-2xl px-4 py-3 font-bold outline-none border-2 border-transparent focus:border-dora-blue" 
+            onkeypress="handleEnter(event, 'exp-amount')">
+    </div>
+
+    <div class="w-full">
+        <label class="text-xs font-bold text-dora-blue ml-2 mb-1 block">金額 (€)</label>
+        <div class="flex gap-2">
+            <input type="number" id="exp-amount" inputmode="decimal" step="0.01" placeholder="0.00" 
+                class="flex-1 bg-gray-50 rounded-2xl px-4 py-3 font-bold outline-none border-2 border-transparent focus:border-dora-blue text-xl" 
+                onkeypress="handleEnter(event, 'submit')">
+            
+            <button onclick="addExpense()" class="w-16 h-14 bg-dora-blue text-white rounded-2xl flex items-center justify-center shadow-md active:scale-90 transition-transform shrink-0">
+                <i data-lucide="plus" class="w-8 h-8"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
             <div id="expense-list" class="flex flex-col gap-3">
-                ${STATE.expenses.length === 0 ? '<p class="text-center text-gray-400 py-4">目前沒有紀錄喔！</p>' : 
+                ${STATE.expenses.length === 0 ? '<p class="text-center text-gray-400 py-4">繼續保持零支出</p>' : 
                     STATE.expenses.slice().reverse().map((item, index) => {
                         const realIndex = STATE.expenses.length - 1 - index;
                         return `
@@ -532,24 +544,36 @@ function addExpense() {
     const name = document.getElementById('exp-name').value;
     const amount = document.getElementById('exp-amount').value;
 
-    if (!name || !amount) return alert('大雄，請輸入項目與金額喔！');
+    if (!name || !amount) {
+        alert('哆啦A夢提醒你：項目和金額都要填喔！');
+        return;
+    }
 
+    // 儲存資料
     STATE.expenses.push({ date, name, amount });
     localStorage.setItem('camino_exp_v2', JSON.stringify(STATE.expenses));
 
-    // 1. 重新渲染
+    // 1. 重新渲染 (這會清空欄位)
     renderExpenseTab();
     
-    // 2. 核心修正：給手機瀏覽器足夠時間重畫 DOM 後再噴射游標
+    // 2. 核心修正：手機強勢噴射游標
     setTimeout(() => {
         const nameInput = document.getElementById('exp-name');
         if (nameInput) {
+            // 先填字
             nameInput.value = "餐飲 - ";
+            
+            // 強制 Focus
             nameInput.focus();
+            
+            // 手機版特定：將游標移到最後
             const len = nameInput.value.length;
             nameInput.setSelectionRange(len, len);
+            
+            // 滾動到輸入框位置，避免鍵盤擋住
+            nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    }, 150); // 稍微延長到 150ms 增加手機上的成功率
+    }, 200); // 增加到 200ms，確保手機鍵盤收起又彈出時的穩定性
 }
         function deleteExpense(index) {
             if(confirm('確定要刪除這筆紀錄嗎？')) {
