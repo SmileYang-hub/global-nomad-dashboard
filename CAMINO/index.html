@@ -429,7 +429,7 @@
         function renderExpenseTab() {
             // 計算總額
             const totalEuro = STATE.expenses.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-            const totalTWD = Math.round(totalEuro * 35.5);
+            const totalTWD = Math.round(totalEuro * 37.4);
 
             // 分類定義
             const categories = [
@@ -634,4 +634,5 @@ function addExpense() {
     </script>
 </body>
 </html>
+
 
