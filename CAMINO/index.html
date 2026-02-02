@@ -563,43 +563,27 @@ function addExpense() {
             }
         }
 
-       function exportCSV() {
-    try {
-        // 1. 準備內容 (BOM + 內容)
-        const csvContent = "\uFEFF" + "Date,Item,Amount(Euro)\n" 
-            + STATE.expenses.map(e => `${e.date},${e.name},${e.amount}`).join("\n");
-        
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const fileName = "camino_expenses.csv";
-
-        // 2. 針對手機端下載的優化處理
-        if (navigator.msSaveBlob) { 
-            // 針對舊版 IE (防範萬一)
-            navigator.msSaveBlob(blob, fileName);
-        } else {
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            
-            link.href = url;
-            link.setAttribute("download", fileName);
-            
-            // 關鍵修正：某些手機瀏覽器需要 link 出現在畫面上才能觸發
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            
-            link.click();
-            
-            // 延遲移除，確保下載動作已交給系統
-            setTimeout(() => {
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            }, 100);
-        }
-    } catch (err) {
-        alert("匯出失敗，請嘗試使用 Chrome 或 Safari 瀏覽器打開網頁。");
-        console.error(err);
-    }
+        function exportCSV() {
+    // 1. 準備 CSV 內容
+    // 關鍵修正：在字串最前面加上 "\uFEFF" (BOM)，解決 Excel 中文亂碼問題
+    const csvContent = "\uFEFF" + "Date,Item,Amount(Euro)\n" 
+        + STATE.expenses.map(e => `${e.date},${e.name},${e.amount}`).join("\n");
+    
+    // 2. 轉換為 Blob 物件 (比原本的 encodeURI 更穩定)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // 3. 建立下載連結
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "camino_expenses.csv");
+    
+    // 4. 觸發點擊並清理
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
+
         // ==========================================
         // 初始化
         // ==========================================
