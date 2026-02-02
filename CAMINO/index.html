@@ -462,34 +462,38 @@
 
            
 
-<div class="glass-card p-5 rounded-[2rem] flex flex-col gap-3 shadow-inner">
-    <div class="w-full">
-        <label class="text-xs font-bold text-dora-blue ml-2 mb-1 block">日期</label>
-        <input type="date" id="exp-date" 
-            class="w-full bg-gray-50 rounded-2xl px-4 py-3 text-base font-bold outline-none border-2 border-transparent focus:border-dora-blue appearance-none">
-    </div>
+<div class="glass-card p-4 rounded-[2rem] flex flex-col gap-3 shadow-inner bg-white/50">
+                
+                <div class="flex w-full gap-2">
+                    <div style="width: 48%;">
+                        <label class=" text-l font-bold text-dora-blue ml-2 mb-1 block"> 📅日期</label>
+                        <input type="date" id="exp-date" 
+                            class="w-full bg-gray-50 rounded-xl px-2 py-3 text-[11px] font-bold outline-none border-2 border-transparent focus:border-dora-blue appearance-none">
+                    </div>
+                    <div style="width: 52%;">
+                         <label class=" text-l  font-bold text-dora-blue ml-2 mb-1 block"> 📝 項目</label>
+                        <input type="text" id="exp-name" placeholder="名稱" 
+                            class="w-full bg-gray-50 rounded-xl px-3 py-3 text-sm font-bold outline-none border-2 border-transparent focus:border-dora-blue" 
+                            onkeypress="handleEnter(event, 'exp-amount')">
+                    </div>
+                </div>
 
-    <div class="w-full">
-        <label class="text-xs font-bold text-dora-blue ml-2 mb-1 block">消費項目</label>
-        <input type="text" id="exp-name" placeholder="例如：晚餐、咖啡..." 
-            class="w-full bg-gray-50 rounded-2xl px-4 py-3 font-bold outline-none border-2 border-transparent focus:border-dora-blue" 
-            onkeypress="handleEnter(event, 'exp-amount')">
-    </div>
-
-    <div class="w-full">
-        <label class="text-xs font-bold text-dora-blue ml-2 mb-1 block">金額 (€)</label>
-        <div class="flex gap-2">
-            <input type="number" id="exp-amount" inputmode="decimal" step="0.01" placeholder="0.00" 
-                class="flex-1 bg-gray-50 rounded-2xl px-4 py-3 font-bold outline-none border-2 border-transparent focus:border-dora-blue text-xl" 
-                onkeypress="handleEnter(event, 'submit')">
-            
-            <button onclick="addExpense()" class="w-16 h-14 bg-dora-blue text-white rounded-2xl flex items-center justify-center shadow-md active:scale-90 transition-transform shrink-0">
-                <i data-lucide="plus" class="w-8 h-8"></i>
-            </button>
-        </div>
-    </div>
-</div>
-
+                <div class="flex w-full gap-2">
+                    <div style="width: 48%;">
+                        <label class="text-l font-bold text-dora-blue ml-2 mb-1 block">💰 金額 (€)</label>
+                        <input type="number" id="exp-amount" inputmode="decimal" step="0.01" placeholder="0.00" 
+                            class="w-full bg-gray-50 rounded-xl px-3 py-3 font-black outline-none border-2 border-transparent focus:border-dora-blue text-lg" 
+                            onkeypress="handleEnter(event, 'submit')">
+                    </div>
+                    <div style="width: 52%;" class="flex flex-col">
+                        
+                        <button onclick="addExpense()" class="w-full h-[52px] bg-dora-blue text-white rounded-xl flex items-center justify-center gap-1 shadow-md active:scale-95 transition-transform font-black">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            <span class="text-sm">新增</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div id="expense-list" class="flex flex-col gap-3">
                 ${STATE.expenses.length === 0 ? '<p class="text-center text-gray-400 py-4">繼續保持零支出</p>' : 
                     STATE.expenses.slice().reverse().map((item, index) => {
@@ -545,35 +549,31 @@ function addExpense() {
     const amount = document.getElementById('exp-amount').value;
 
     if (!name || !amount) {
-        alert('哆啦A夢提醒你：項目和金額都要填喔！');
+        alert('哆啦A夢提醒：項目和金額都要填喔！');
         return;
     }
 
-    // 儲存資料
     STATE.expenses.push({ date, name, amount });
     localStorage.setItem('camino_exp_v2', JSON.stringify(STATE.expenses));
 
-    // 1. 重新渲染 (這會清空欄位)
+    // 1. 重新渲染
     renderExpenseTab();
     
-    // 2. 核心修正：手機強勢噴射游標
+    // 2. 針對手機優化的噴射游標 (250ms 是黃金延遲)
     setTimeout(() => {
         const nameInput = document.getElementById('exp-name');
         if (nameInput) {
-            // 先填字
             nameInput.value = "餐飲 - ";
-            
-            // 強制 Focus
             nameInput.focus();
             
-            // 手機版特定：將游標移到最後
+            // 將游標移到最後面，讓你直接輸入細項
             const len = nameInput.value.length;
             nameInput.setSelectionRange(len, len);
             
-            // 滾動到輸入框位置，避免鍵盤擋住
+            // 讓手機自動捲動到輸入框中心
             nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    }, 200); // 增加到 200ms，確保手機鍵盤收起又彈出時的穩定性
+    }, 250); 
 }
         function deleteExpense(index) {
             if(confirm('確定要刪除這筆紀錄嗎？')) {
