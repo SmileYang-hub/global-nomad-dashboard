@@ -2,64 +2,71 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>哆啦A夢百寶袋記帳</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Pocket Ledger</title>
     <style>
         :root {
             --dora-blue: #0096FF;
             --dora-red: #DD0000;
             --dora-yellow: #FFD700;
             --dora-white: #FFFFFF;
-            --dora-dark: #333;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: "Iansui", sans-serif; }
-        body { background-color: #F0F8FF; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* 基礎設定 */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, "Helvetica Neue", sans-serif; }
+        body { 
+            background-color: #F0F8FF; margin: 0; padding: 0; height: 100vh; 
+            display: flex; flex-direction: column; overflow: hidden;
+            /* 讓內容直接從頂部開始，不留標題空間，但避開動態島 */
+            padding-top: max(15px, env(safe-area-inset-top)); 
+        }
 
-        header { background: var(--dora-blue); color: white; padding: 15px; text-align: center; font-size: 22px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; }
-        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 100px; }
+        /* 移除 Header 樣式，我們不再需要它 */
+        
+        /* 修正：增加底部留白，避免被 Safari 工具列擋住 */
+        main { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 120px; }
 
-        /* 卡片設計 */
         .card { background: white; border-radius: 20px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,150,255,0.1); border: 2px solid #E6F7FF; position: relative; }
-        label { display: block; font-size: 15px; color: #555; margin-bottom: 8px; font-weight: bold; }
+        label { display: block; font-size: 14px; color: #555; margin-bottom: 8px; font-weight: bold; }
         input, select { width: 100%; padding: 12px; font-size: 18px; border: 2px solid #E0E0E0; border-radius: 12px; outline: none; background: #FAFAFA; }
         input:focus { border-color: var(--dora-blue); background: white; }
 
         /* 快速分類按鈕 */
         .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
         .cat-btn { background: white; border: 2px solid #E0E0E0; border-radius: 15px; padding: 10px 0; text-align: center; font-size: 24px; cursor: pointer; }
-        .cat-btn span { display: block; font-size: 12px; margin-top: 4px; color: #666; }
+        .cat-btn span { display: block; font-size: 11px; margin-top: 4px; color: #666; font-weight: bold; }
+        .cat-btn:active { background-color: #E6F7FF; border-color: var(--dora-blue); }
 
-        /* 數據看版 */
         .summary-box { display: flex; gap: 10px; margin-bottom: 15px; }
         .summary-card { flex: 1; background: linear-gradient(135deg, #0096FF, #66C2FF); color: white; padding: 12px; border-radius: 18px; text-align: center; }
-        .summary-val { font-size: 20px; font-weight: bold; margin-top: 4px; }
+        .summary-val { font-size: 18px; font-weight: bold; margin-top: 4px; }
 
-        /* 列表對齊排版 */
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
         .list-left { text-align: left; flex: 1; }
         .list-right { text-align: right; display: flex; align-items: center; gap: 10px; }
 
-        /* 導航列 */
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; background: white; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top-left-radius: 25px; border-top-right-radius: 25px; }
-        .nav-item { text-align: center; color: #aaa; flex: 1; font-weight: bold; font-size: 12px; }
+        /* 導航列：固定在底部 */
+        nav { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            height: calc(85px + env(safe-area-inset-bottom)); 
+            background: white; display: flex; justify-content: space-around; 
+            padding-bottom: env(safe-area-inset-bottom);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-top-left-radius: 25px; border-top-right-radius: 25px; 
+            z-index: 100;
+        }
+        .nav-item { text-align: center; color: #aaa; flex: 1; font-weight: bold; font-size: 11px; padding-top: 12px; }
         .nav-item.active { color: var(--dora-blue); }
-        .nav-icon { font-size: 26px; display: block; }
+        .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
 
         .page { display: none; }
         .page.active { display: block; }
         .del-btn { color: #ccc; font-size: 20px; padding: 5px; cursor: pointer; }
-        
-        /* 回到今天按鈕 */
-        .back-today { position: absolute; right: 15px; top: 12px; font-size: 12px; color: var(--dora-blue); cursor: pointer; background: #E6F7FF; padding: 2px 8px; border-radius: 10px; }
-
-        /* 隱藏的檔案選擇器 */
+        .back-today { position: absolute; right: 15px; top: 12px; font-size: 12px; color: var(--dora-blue); cursor: pointer; background: #E6F7FF; padding: 4px 10px; border-radius: 10px; }
         #csv-file-input { display: none; }
     </style>
 </head>
 <body>
 
-<header id="header-title"> 📒 Pocket Ledger 🛫 </header>
 <main>
     <div id="page-expense" class="page active">
         <div class="card">
@@ -74,7 +81,7 @@
 
         <div class="card">
             <div style="display:flex; gap:10px;">
-                <div style="flex:2;"><label>💰  Amount</label><input type="text" id="ex-amount" inputmode="decimal" placeholder="0.00"></div>
+                <div style="flex:2;"><label>💰 Amount</label><input type="text" id="ex-amount" inputmode="decimal" placeholder="0.00"></div>
                 <div style="flex:1;"><label>💱 Currency</label><select id="ex-currency"></select></div>
             </div>
             <div id="wallet-hint" style="text-align:center; color:var(--dora-blue); font-weight:bold; margin-top:10px; font-size:13px;"></div>
@@ -95,19 +102,19 @@
             <label>💱 Pick a currency</label>
             <select id="new-curr-select" onchange="handleCurrencySelect(this)">
                 <option value=""> 👇 Pick one…</option>
-                <option value="JPY">JPY 日幣 🇯🇵</option>
-                <option value="EUR">EUR 歐元 🇪🇺</option>
-                <option value="USD">USD 美金 🇺🇸</option>
-                <option value="KRW">KRW 韓元 🇰🇷</option>
-                <option value=" TWD ">TWD 臺幣 🇹w</option>
+                <option value="JPY">JPY Japan 🇯🇵</option>
+                <option value="EUR">EUR Europe 🇪🇺</option>
+                <option value="USD">USD USA 🇺🇸</option>
+                <option value="KRW">KRW Korea 🇰🇷</option>
+                <option value="TWD">TWD Taiwan 🇹🇼</option>
                 <option value="OTHER"> ✍️ Custom...</option>
             </select>
-            <input type="text" id="new-curr-custom" placeholder="例如: GBP" style="display:none; margin-top:10px; text-transform:uppercase;">
+            <input type="text" id="new-curr-custom" placeholder="e.g. GBP" style="display:none; margin-top:10px; text-transform:uppercase;">
             <div style="display:flex; gap:10px; margin-top:15px;">
-                <div style="flex:1"><label> 💱 TWD Exchange Rate </label><input type="text" id="new-curr-rate" inputmode="decimal" placeholder="0.21"></div>
-                <div style="flex:1"><label> 💵 Start your treasure stash! </label><input type="text" id="new-curr-initial" inputmode="decimal" placeholder="50000"></div>
+                <div style="flex:1"><label> 💱 TWD Rate </label><input type="text" id="new-curr-rate" inputmode="decimal" placeholder="0.21"></div>
+                <div style="flex:1"><label> 💵 Initial Amt </label><input type="text" id="new-curr-initial" inputmode="decimal" placeholder="50000"></div>
             </div>
-            <button style="background:var(--dora-yellow); color:#8B4500; border:none; padding:15px; width:100%; border-radius:50px; font-size:18px; font-weight:bold; margin-top:15px; box-shadow:0 4px 0 #CCAC00;" onclick="addCurrency()">✨ Add to Treasure Bag </button>
+            <button style="background:var(--dora-yellow); color:#8B4500; border:none; padding:15px; width:100%; border-radius:50px; font-size:18px; font-weight:bold; margin-top:15px; box-shadow:0 4px 0 #CCAC00;" onclick="addCurrency()">✨ Add to Wallet </button>
         </div>
         
         <div class="card">
@@ -116,48 +123,51 @@
         </div>
 
         <div class="card" style="border-color: #FFD700; background: #FFFDF0;">
-            <label>📡 數據傳送門 (電腦 ↔ 手機)</label>
+            <label>📡 Data Portal (PC ↔ Phone)</label>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <button style="background:#888; color:white; border:none; padding:12px; border-radius:50px; font-size:14px;" onclick="exportCSV()">📤 匯出 CSV</button>
-                <button style="background:var(--dora-blue); color:white; border:none; padding:12px; border-radius:50px; font-size:14px;" onclick="document.getElementById('csv-file-input').click()">📥 匯入 CSV</button>
+                <button style="background:#888; color:white; border:none; padding:12px; border-radius:50px; font-size:14px;" onclick="exportCSV()">📤 Export CSV</button>
+                <button style="background:var(--dora-blue); color:white; border:none; padding:12px; border-radius:50px; font-size:14px;" onclick="document.getElementById('csv-file-input').click()">📥 Import CSV</button>
             </div>
             <input type="file" id="csv-file-input" accept=".csv" onchange="importCSV(this)">
-            <p style="font-size: 11px; color: #888; margin-top: 10px; text-align: center;">※ 匯入會與現有資料合併，不會覆蓋原有記錄。</p>
         </div>
     </div>
 
     <div id="page-piggy" class="page">
         <div class="summary-box">
             <div class="summary-card">
-                <div style="font-size:12px; opacity:0.9;">🔔 今日花費 (台幣)</div>
+                <div style="font-size:12px; opacity:0.9;">🔔 Today's Spent</div>
                 <div class="summary-val">NT$ <span id="today-total">0</span></div>
             </div>
             <div class="summary-card" style="background: linear-gradient(135deg, #FF6B6B, #FF8E8E);">
-                <div style="font-size:12px; opacity:0.9;">🏆 旅程累計 (台幣)</div>
+                <div style="font-size:12px; opacity:0.9;">🏆 Trip Total</div>
                 <div class="summary-val">NT$ <span id="grand-total">0</span></div>
             </div>
         </div>
-
         <div class="card">
             <h3 style="margin:0 0 10px 0; font-size:15px;"> 🧾 Wallet Balance </h3>
             <table style="width:100%; font-size:13px; text-align:left;" id="piggy-table"></table>
         </div>
-
         <div class="card">
-            <label> 🔍  Search & Recent History (20) </label>
-            <input type="text" id="history-search" placeholder=" 📝 Type to search loot…">
+            <label> 🔍 Search History </label>
+            <input type="text" id="history-search" placeholder=" 📝 Search item...">
             <div id="history-list" style="margin-top:10px;"></div>
         </div>
     </div>
 </main>
 
 <nav>
-    <div class="nav-item active" onclick="switchPage('expense', this)"><span class="nav-icon">🍔</span> Log your loot!</div>
-    <div class="nav-item" onclick="switchPage('currency', this)"><span class="nav-icon">💵 </span> Travel Wallet</div>
-    <div class="nav-item" onclick="switchPage('piggy', this)"><span class="nav-icon">🗺️ </span> Treasure Map </div>
+    <div class="nav-item active" onclick="switchPage('expense', this)"><span class="nav-icon">🍔</span> Log Loot</div>
+    <div class="nav-item" onclick="switchPage('currency', this)"><span class="nav-icon">💵</span> Wallet</div>
+    <div class="nav-item" onclick="switchPage('piggy', this)"><span class="nav-icon">🗺️</span> History</div>
 </nav>
 
 <script>
+    // 1. 全域錯誤捕捉器 (Debug用)
+    window.onerror = function(msg, url, line) {
+        alert("System Error:\n" + msg + "\n(Line: " + line + ")");
+        return true;
+    };
+
     let appData = {
         currencies: {},
         expenses: [],
@@ -166,18 +176,19 @@
         selectedDate: new Date().toISOString().split('T')[0]
     };
 
-const categories = [
-  { icon: "🍽️", name: "餐飲" },
-  { icon: "🚆", name: "交通" },
-  { icon: " 🏡 ", name: "住宿" },
-  { icon: "🎫", name: "門票" },
-  { icon: "🧴", name: "補給" },
-  { icon: "🎁", name: "手信" },
-  { icon: " 🧦", name: "裝備" },
-  { icon: "📦", name: "其他" }
-];
+    const categories = [
+        { icon: "\uD83C\uDF74", name: "Food" },
+        { icon: "\uD83D\uDE86", name: "Transport" },
+        { icon: "\uD83C\uDFE8", name: "Hotel" },
+        { icon: "\uD83C\uDFAB", name: "Ticket" },
+        { icon: "\uD83E\uDDB4", name: "Supply" },
+        { icon: "\uD83C\uDF81", name: "Gift" },
+        { icon: "\uD83E\uDDE6", name: "Gear" },
+        { icon: "\uD83D\uDCE6", name: "Other" }
+    ];
+
     document.addEventListener('DOMContentLoaded', () => {
-        loadData();
+        loadData(); // 這裡現在很安全，不會因為讀取失敗而當機
         renderCategories();
         setupKeyEvents();
         updateUI();
@@ -186,16 +197,10 @@ const categories = [
     function setupKeyEvents() {
         const itemInp = document.getElementById('ex-item');
         const amtInp = document.getElementById('ex-amount');
-        const dateInp = document.getElementById('ex-date');
-
         itemInp.onkeydown = (e) => { if(e.key === 'Enter') amtInp.focus(); };
         amtInp.onkeydown = (e) => { if(e.key === 'Enter') addExpense(); };
-        dateInp.onchange = (e) => { appData.selectedDate = e.target.value; };
-
-        document.getElementById('new-curr-rate').onkeydown = (e) => { if(e.key === 'Enter') document.getElementById('new-curr-initial').focus(); };
-        document.getElementById('new-curr-initial').onkeydown = (e) => { if(e.key === 'Enter') addCurrency(); };
+        document.getElementById('ex-date').onchange = (e) => { appData.selectedDate = e.target.value; };
         document.getElementById('history-search').oninput = (e) => renderHistoryList(e.target.value);
-
         [amtInp, document.getElementById('new-curr-rate'), document.getElementById('new-curr-initial')].forEach(inp => {
             inp.addEventListener('input', function() { this.value = this.value.replace(',', '.'); });
         });
@@ -209,7 +214,7 @@ const categories = [
 
     function renderCategories() {
         const grid = document.getElementById('cat-grid');
-        grid.innerHTML = '';
+        grid.innerHTML = ''; 
         categories.forEach(cat => {
             const btn = document.createElement('div');
             btn.className = 'cat-btn';
@@ -219,7 +224,6 @@ const categories = [
                 input.value = cat.name + "-";
                 appData.lastCategory = cat.name;
                 input.focus();
-                input.setSelectionRange(input.value.length, input.value.length);
             };
             grid.appendChild(btn);
         });
@@ -230,31 +234,29 @@ const categories = [
         const amount = parseFloat(document.getElementById('ex-amount').value);
         const currency = document.getElementById('ex-currency').value;
         const date = document.getElementById('ex-date').value;
-
         if(!item || isNaN(amount) || !currency) return;
-
-        const rate = appData.currencies[currency].rate;
-        appData.expenses.unshift({
-            id: Date.now(),
-            date: date,
-            item: item,
-            amount: amount,
-            currency: currency,
-            rate: rate,
-            baseAmount: Math.round(amount * rate)
+        
+        const rate = (appData.currencies[currency] && appData.currencies[currency].rate) || 0;
+        
+        appData.expenses.unshift({ 
+            id: Date.now(), 
+            date: date, 
+            item: item, 
+            amount: amount, 
+            currency: currency, 
+            rate: rate, 
+            baseAmount: Math.round(amount * rate) 
         });
         
         appData.lastCurrency = currency;
         saveData();
-        
         document.getElementById('ex-amount').value = '';
-        document.getElementById('ex-item').value = appData.lastCategory + "-";
-        document.getElementById('ex-item').focus();
+        document.getElementById('ex-item').value = (appData.lastCategory ? appData.lastCategory + "-" : "");
         updateWalletHint();
     }
 
     function deleteExpense(id) {
-        if(!confirm("要把這筆帳拿掉嗎？金額會自動補回錢包喔！")) return;
+        if(!confirm("Delete this entry?")) return;
         appData.expenses = appData.expenses.filter(e => e.id !== id);
         saveData();
         renderPiggyPage();
@@ -263,31 +265,24 @@ const categories = [
 
     function renderPiggyPage() {
         const todayStr = new Date().toISOString().split('T')[0];
-        let todaySum = 0;
-        let grandSum = 0;
-
+        let todaySum = 0, grandSum = 0;
         appData.expenses.forEach(e => {
             if(e.date === todayStr) todaySum += e.baseAmount;
             grandSum += e.baseAmount;
         });
-
         document.getElementById('today-total').innerText = todaySum.toLocaleString();
         document.getElementById('grand-total').innerText = grandSum.toLocaleString();
-
+        
         const table = document.getElementById('piggy-table');
-        table.innerHTML = `<tr><th>幣別</th><th>初始</th><th>已花</th><th>剩餘</th></tr>`;
+        table.innerHTML = `<tr><th>Curr</th><th>Init</th><th>Spent</th><th>Left</th></tr>`;
         const spentMap = {};
         appData.expenses.forEach(e => { spentMap[e.currency] = (spentMap[e.currency] || 0) + e.amount; });
+        
         for(let code in appData.currencies) {
             const c = appData.currencies[code];
             const spent = spentMap[code] || 0;
             const remain = c.initial - spent;
-            table.innerHTML += `<tr>
-                <td><b>${code}</b></td>
-                <td>${c.initial}</td>
-                <td>${spent.toFixed(1)}</td>
-                <td style="color:${remain<0?'red':'var(--dora-blue)'}; font-weight:bold;">${remain.toFixed(1)}</td>
-            </tr>`;
+            table.innerHTML += `<tr><td><b>${code}</b></td><td>${c.initial}</td><td>${spent.toFixed(1)}</td><td style="color:${remain<0?'red':'var(--dora-blue)'}; font-weight:bold;">${remain.toFixed(1)}</td></tr>`;
         }
         renderHistoryList();
     }
@@ -295,74 +290,42 @@ const categories = [
     function renderHistoryList(filter = '') {
         const list = document.getElementById('history-list');
         const filtered = appData.expenses.filter(e => e.item.toLowerCase().includes(filter.toLowerCase())).slice(0, 20);
-        
         list.innerHTML = filtered.map(e => `
             <div class="list-item">
-                <div class="list-left">
-                    <div style="color:#999; font-size:11px;">${e.date}</div>
-                    <div style="font-size:17px; font-weight:bold;">${e.item}</div>
-                </div>
-                <div class="list-right">
-                    <div style="text-align:right;">
-                        <div style="font-size:17px; font-weight:bold;">${e.currency} ${e.amount}</div>
-                        <div style="color:#bbb; font-size:11px;">(NT$ ${e.baseAmount.toLocaleString()})</div>
-                    </div>
-                    <div class="del-btn" onclick="deleteExpense(${e.id})">🗑️</div>
-                </div>
+                <div class="list-left"><div style="color:#999; font-size:11px;">${e.date}</div><div style="font-size:16px; font-weight:bold;">${e.item}</div></div>
+                <div class="list-right"><div><div style="font-size:16px; font-weight:bold;">${e.currency} ${e.amount}</div><div style="color:#bbb; font-size:11px;">(NT$ ${e.baseAmount.toLocaleString()})</div></div>
+                <div class="del-btn" onclick="deleteExpense(${e.id})">🗑️</div></div>
             </div>
         `).join('');
     }
 
-    // --- 數據傳送門：匯入功能 ---
     function importCSV(input) {
         const file = input.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = function(e) {
-            const text = e.target.result;
-            const rows = text.split('\n');
-            let importCount = 0;
-
-            // 略過第一行標頭
-            for (let i = 1; i < rows.length; i++) {
-                if (!rows[i].trim()) continue;
-                const cols = rows[i].split(',');
-                if (cols.length < 6) continue;
-
-                const newExp = {
-                    id: Date.now() + i, // 避免 ID 重複
-                    date: cols[0],
-                    item: cols[1],
-                    amount: parseFloat(cols[2]),
-                    currency: cols[3],
-                    rate: parseFloat(cols[4]),
-                    baseAmount: parseInt(cols[5])
-                };
-
-                // 簡單防重：檢查日期項目金額是否完全相同
-                const isDuplicate = appData.expenses.some(old => 
-                    old.date === newExp.date && 
-                    old.item === newExp.item && 
-                    old.amount === newExp.amount
-                );
-
-                if (!isDuplicate) {
-                    appData.expenses.push(newExp);
-                    importCount++;
+            try {
+                const rows = e.target.result.split('\n');
+                let count = 0;
+                for (let i = 1; i < rows.length; i++) {
+                    if (!rows[i].trim()) continue;
+                    const cols = rows[i].split(',');
+                    if (cols.length < 6) continue;
+                    appData.expenses.push({ id: Date.now()+i, date: cols[0], item: cols[1], amount: parseFloat(cols[2]), currency: cols[3], rate: parseFloat(cols[4]), baseAmount: parseInt(cols[5]) });
+                    count++;
                 }
+                appData.expenses.sort((a, b) => b.date.localeCompare(a.date));
+                saveData();
+                updateUI();
+                alert(`Imported ${count} items!`);
+            } catch(e) {
+                alert("Import failed: " + e.message);
             }
-            // 排序：讓最新的日期排在上面
-            appData.expenses.sort((a, b) => b.date.localeCompare(a.date));
-            saveData();
-            updateUI();
-            alert(`哆啦A夢：成功從任意門匯入了 ${importCount} 筆資料！`);
-            input.value = ''; // 清空選擇
+            input.value = '';
         };
         reader.readAsText(file);
     }
 
-    // --- 基礎邏輯 ---
     function switchPage(pageId, navEl) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('page-' + pageId).classList.add('active');
@@ -378,7 +341,6 @@ const categories = [
             document.getElementById('new-curr-custom').focus();
         } else {
             document.getElementById('new-curr-custom').style.display = 'none';
-            if(sel.value) document.getElementById('new-curr-rate').focus();
         }
     }
 
@@ -390,8 +352,7 @@ const categories = [
         if(!code || isNaN(rate) || isNaN(initial)) return;
         appData.currencies[code] = { rate, initial };
         saveData();
-        renderCurrencyList();
-        updateCurrencySelect();
+        updateUI();
         document.getElementById('new-curr-rate').value = '';
         document.getElementById('new-curr-initial').value = '';
     }
@@ -400,7 +361,7 @@ const categories = [
         const div = document.getElementById('currency-list');
         div.innerHTML = '';
         for(let code in appData.currencies) {
-            div.innerHTML += `<div class="list-item"><span><b>${code}</b> (${appData.currencies[code].rate})</span><span>初始: ${appData.currencies[code].initial}</span></div>`;
+            div.innerHTML += `<div class="list-item"><span><b>${code}</b> (${appData.currencies[code].rate})</span><span>Init: ${appData.currencies[code].initial}</span></div>`;
         }
     }
 
@@ -417,28 +378,42 @@ const categories = [
         const code = document.getElementById('ex-currency').value;
         if(!code || !appData.currencies[code]) return;
         const spent = appData.expenses.filter(e => e.currency === code).reduce((s, e) => s + e.amount, 0);
-        const hint = document.getElementById('wallet-hint');
-        if(hint) hint.innerText = `👛 ${code} 剩餘: ${(appData.currencies[code].initial - spent).toFixed(2)}`;
+        document.getElementById('wallet-hint').innerText = `👛 ${code} Left: ${(appData.currencies[code].initial - spent).toFixed(2)}`;
     }
 
-    function saveData() { localStorage.setItem('dora_v5', JSON.stringify(appData)); }
+    // 【關鍵修正】這裡加入 try-catch，防止因 localStorage 權限問題導致整個程式當機
+    function saveData() { 
+        try {
+            localStorage.setItem('dora_v5_english', JSON.stringify(appData)); 
+        } catch (e) {
+            console.error("Save failed (iOS restriction):", e);
+        }
+    }
+
     function loadData() {
-        const d = localStorage.getItem('dora_v5');
-        if(d) {
-            appData = JSON.parse(d);
-            document.getElementById('ex-date').value = appData.selectedDate;
-        } else {
+        try {
+            const d = localStorage.getItem('dora_v5_english');
+            if(d) {
+                appData = JSON.parse(d);
+                document.getElementById('ex-date').value = appData.selectedDate;
+            } else {
+                resetToToday();
+            }
+        } catch (e) {
+            console.error("Load failed (iOS restriction):", e);
+            // 如果讀取失敗，就用預設值，至少保證程式能跑，按鈕能出來
             resetToToday();
         }
     }
-    function updateUI() { updateCurrencySelect(); }
+
+    function updateUI() { updateCurrencySelect(); renderCurrencyList(); }
+    
     function exportCSV() {
-        let csv = "\uFEFF日期,項目,金額,幣別,匯率,台幣\n";
-        // 匯出全部資料
+        let csv = "\uFEFFDate,Item,Amount,Currency,Rate,TWD\n";
         appData.expenses.forEach(e => csv += `${e.date},${e.item},${e.amount},${e.currency},${e.rate},${e.baseAmount}\n`);
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-        a.download = `哆啦A夢旅費報表.csv`;
+        a.download = `PocketLedger_Export.csv`;
         a.click();
     }
 </script>
