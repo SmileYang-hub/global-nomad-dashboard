@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dora-Ledger 多人雲端記帳</title>
+    
+    <link rel="manifest" href="data:application/json;base64,eyJkYXRhIjoicGxhY2Vob2xkZXIifQ==">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        doraBlue: '#8ED1FC',
+                        macaronPink: '#F9A8D4',
+                        macaronYellow: '#FDE68A',
+                        macaronGreen: '#BBF7D0',
+                        macaronPurple: '#DDD6FE',
+                        bgBase: '#F8FAFC',
+                    },
+                    fontFamily: {
+                        sans: ['Iansui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Global Reset & Base Styles */
+        body {
+            background-color: #F8FAFC;
+            font-family: 'Iansui', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            padding-bottom: 100px; /* Space for Navbar */
+        }
+
+        /* Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.70);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        /* Extreme Rounded Corners */
+        .rounded-extreme {
+            border-radius: 2.5rem;
+        }
+
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Grid Layout for Categories (Strict 4x2) */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(2, auto);
+            gap: 12px;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-copter {
+            animation: spin-slow 0.6s linear infinite;
+        }
+
+        @keyframes glow {
+            0% { filter: drop-shadow(0 0 2px #8ED1FC); }
+            50% { filter: drop-shadow(0 0 8px #8ED1FC); }
+            100% { filter: drop-shadow(0 0 2px #8ED1FC); }
+        }
+        .active-tab-icon {
+            color: #8ED1FC;
+            animation: glow 2s infinite;
+        }
+    </style>
+</head>
+<body class="text-slate-700 select-none">
+
+    <header class="fixed top-0 w-full z-40 px-6 py-4 glass-card rounded-b-[2rem] flex justify-between items-center transition-all duration-300">
+        <div class="flex items-center gap-2">
+            <i data-lucide="bell" class="text-doraBlue w-6 h-6"></i>
+            <h1 class="text-lg font-bold tracking-widest text-doraBlue">Dora-Ledger</h1>
+        </div>
+        <div class="text-xs text-slate-500 font-medium bg-white/50 px-3 py-1 rounded-full border border-white">
+            <span id="currentUserDisplay">載入中...</span>
+        </div>
+    </header>
+
+    <div class="h-20"></div> <main id="page-log" class="px-4 animate-fade-in block">
+        
+        <div class="glass-card rounded-extreme p-5 mb-6 sticky top-24 z-30 transition-all">
+            
+            <div class="flex justify-between items-center mb-3 gap-3">
+                <div class="flex-1 relative">
+                    <i data-lucide="pencil" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                    <input type="text" id="inputTitle" placeholder="項目 (例如: 銅鑼燒)" 
+                        class="w-full bg-white/60 rounded-full pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-doraBlue/50 text-sm font-medium placeholder-slate-400 transition-all">
+                </div>
+                <div class="w-20 relative">
+                    <input type="number" id="inputRate" value="1.0" step="0.01"
+                        class="w-full bg-white/40 text-right rounded-full pr-3 py-1 text-xs outline-none focus:bg-white text-slate-500 border border-transparent focus:border-macaronYellow">
+                    <span class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400">匯率</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mb-4 items-center h-14">
+                <div class="flex-1 h-full relative">
+                    <input type="number" id="inputAmount" inputmode="decimal" placeholder="0" 
+                        class="w-full h-full bg-macaronYellow/30 text-2xl font-bold text-center rounded-full outline-none focus:bg-macaronYellow/50 placeholder-slate-300 text-slate-700">
+                </div>
+                
+                <button id="btnCurrency" class="w-[80px] h-full bg-white/60 rounded-full flex items-center justify-center font-bold text-slate-600 border border-white shadow-sm hover:bg-white transition-colors">
+                    JPY
+                </button>
+
+                <button id="btnSubmit" class="w-[56px] h-full bg-doraBlue text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+                    💸
+                </button>
+            </div>
+
+            <div id="categoryGrid" class="category-grid mb-2">
+                </div>
+
+            <div class="flex justify-center mt-2">
+                <button id="toggleAdvanced" class="text-slate-400 hover:text-doraBlue transition-colors">
+                    <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div id="advancedPanel" class="hidden pt-4 border-t border-slate-100 mt-2">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-slate-500 flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> 日期</span>
+                    <input type="date" id="inputDate" class="bg-white/50 rounded-full px-3 py-1 text-sm outline-none">
+                </div>
+                <div class="mt-3">
+                    <span class="text-sm font-bold text-slate-500 flex items-center gap-1 mb-2"><i data-lucide="users" class="w-4 h-4"></i> 分攤成員 (點擊加權重)</span>
+                    <div id="sharesContainer" class="flex flex-wrap gap-2">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-400 mb-3 px-2 flex items-center gap-2">
+            <i data-lucide="clock" class="w-4 h-4"></i> 最近冒險
+        </h3>
+        <div id="recentList" class="space-y-3">
+            </div>
+    </main>
+
+    <main id="page-wallet" class="px-4 hidden animate-fade-in pb-24">
+        <div class="glass-card rounded-extreme p-6 mb-6 text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-macaronPink to-doraBlue"></div>
+            <h2 class="text-slate-500 text-sm mb-1">團體總支出 (Base)</h2>
+            <div class="text-3xl font-bold text-slate-700 tracking-tight" id="walletTotalParams">NT$ 0</div>
+            <div class="mt-4 grid grid-cols-2 gap-4" id="walletMemberBalances">
+                </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-400 mb-3 px-2 flex items-center gap-2">
+            <i data-lucide="arrow-right-left" class="w-4 h-4"></i> 建議結算 (Min Cash Flow)
+        </h3>
+        <div id="settlementList" class="space-y-3">
+            </div>
+    </main>
+
+    <main id="page-my" class="px-4 hidden animate-fade-in pb-24">
+        <div id="myProfileCard" class="glass-card rounded-extreme p-6 mb-6 relative overflow-hidden transition-all duration-700">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 rounded-full bg-doraBlue/20 flex items-center justify-center text-2xl border-2 border-white shadow-sm">
+                    🐱
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-700" id="myPageName">User</h2>
+                    <span id="myAchievement" class="text-[10px] bg-macaronYellow text-orange-600 px-2 py-0.5 rounded-full font-bold">冒險新手</span>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mt-2">
+                <div class="bg-white/50 rounded-[1.5rem] p-3 text-center">
+                    <div class="text-[10px] text-slate-400 mb-1">實際負擔 (吃掉的)</div>
+                    <div class="text-xl font-bold text-doraBlue" id="myBurdenAmount">0</div>
+                </div>
+                <div class="bg-white/50 rounded-[1.5rem] p-3 text-center">
+                    <div class="text-[10px] text-slate-400 mb-1">墊付總額 (掏出的)</div>
+                    <div class="text-xl font-bold text-macaronPink" id="myPayerAmount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-slate-400 mb-3 px-2 flex items-center gap-2">
+            <i data-lucide="briefcase" class="w-4 h-4"></i> 道具消耗分析
+        </h3>
+        <div id="gadgetList" class="space-y-4">
+            </div>
+    </main>
+
+    <main id="page-history" class="px-4 hidden animate-fade-in pb-24">
+        <div class="flex justify-between items-center mb-4 px-2">
+            <h3 class="text-sm font-bold text-slate-400 flex items-center gap-2">
+                <i data-lucide="history" class="w-4 h-4"></i> 冒險日誌
+            </h3>
+            <span class="text-[10px] text-slate-400 bg-white/50 px-2 py-1 rounded-full">僅顯示相關</span>
+        </div>
+        <div id="fullHistoryList" class="space-y-3 pb-10">
+            </div>
+    </main>
+
+    <main id="page-settings" class="px-4 hidden animate-fade-in pb-24">
+        
+        <div class="glass-card rounded-extreme p-5 mb-4">
+            <h3 class="font-bold text-slate-700 mb-2 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> 成員管理</h3>
+            <div id="settingsMemberList" class="space-y-2"></div>
+        </div>
+
+        <div class="glass-card rounded-extreme p-5 mb-4 border-l-4 border-doraBlue">
+            <h3 class="font-bold text-doraBlue mb-3 flex items-center gap-2"><i data-lucide="wrench" class="w-4 h-4"></i> Admin 道具</h3>
+            <button onclick="app.rebuildBalances()" class="w-full bg-white/50 hover:bg-doraBlue hover:text-white transition-colors text-slate-600 font-bold py-3 rounded-full flex items-center justify-center gap-2 mb-2 text-sm">
+                <i data-lucide="refresh-ccw" class="w-4 h-4"></i> 時光機 (Rebuild Balances)
+            </button>
+            <div id="rebuildStatus" class="text-center text-[10px] text-slate-400 h-4"></div>
+        </div>
+
+        <div class="glass-card rounded-extreme p-5 mb-4">
+            <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i> 記憶麵包 (Data)</h3>
+            
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <button onclick="app.exportLedgerCSV()" class="bg-macaronGreen/30 text-emerald-700 py-3 rounded-[1.5rem] text-xs font-bold flex flex-col items-center justify-center gap-1">
+                    <i data-lucide="file-spreadsheet" class="w-5 h-5"></i> 匯出對帳單
+                </button>
+                <button onclick="app.exportBackupCSV()" class="bg-macaronPurple/30 text-purple-700 py-3 rounded-[1.5rem] text-xs font-bold flex flex-col items-center justify-center gap-1">
+                    <i data-lucide="save" class="w-5 h-5"></i> 匯出備份檔
+                </button>
+            </div>
+
+            <div class="relative">
+                <input type="file" id="importFile" class="hidden" accept=".csv">
+                <button onclick="document.getElementById('importFile').click()" class="w-full border-2 border-dashed border-slate-300 text-slate-400 py-3 rounded-full text-xs font-bold hover:border-doraBlue hover:text-doraBlue transition-colors">
+                    <i data-lucide="upload" class="w-3 h-3 inline mr-1"></i> 從備份檔匯入 (Merge)
+                </button>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-2 text-center">注意：僅支援 Backup CSV，對帳單無法匯入。</p>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-6 left-4 right-4 h-[72px] glass-card rounded-full flex justify-around items-center z-50 shadow-2xl">
+        <button class="nav-btn active-tab-icon flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all" data-target="page-log">
+            <i data-lucide="pen-tool" class="w-6 h-6"></i>
+        </button>
+        <button class="nav-btn text-slate-400 flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all" data-target="page-wallet">
+            <i data-lucide="wallet" class="w-6 h-6"></i>
+        </button>
+        <button class="nav-btn text-slate-400 flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all" data-target="page-my">
+            <i data-lucide="smile" class="w-6 h-6"></i>
+        </button>
+        <button class="nav-btn text-slate-400 flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all" data-target="page-history">
+            <i data-lucide="scroll" class="w-6 h-6"></i>
+        </button>
+        <button class="nav-btn text-slate-400 flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all" data-target="page-settings">
+            <i data-lucide="settings" class="w-6 h-6"></i>
+        </button>
+    </nav>
+
+    <script>
+        // --- 1. MOCK DATA & CONFIG ---
+        const CONSTANTS = {
+            CATEGORIES: [
+                { key: 'food', icon: 'utensils', name: '餐飲', color: 'bg-macaronYellow' },
+                { key: 'transport', icon: 'train-front', name: '交通', color: 'bg-doraBlue' },
+                { key: 'stay', icon: 'home', name: '住宿', color: 'bg-macaronPurple' },
+                { key: 'ticket', icon: 'ticket', name: '門票', color: 'bg-macaronPink' },
+                { key: 'shopping', icon: 'shopping-bag', name: '補給', color: 'bg-macaronGreen' },
+                { key: 'gift', icon: 'gift', name: '手信', color: 'bg-red-200' },
+                { key: 'gear', icon: 'backpack', name: '裝備', color: 'bg-orange-200' },
+                { key: 'other', icon: 'package', name: '其他', color: 'bg-slate-200' }
+            ],
+            CURRENCIES: ['JPY', 'TWD', 'USD']
+        };
+
+        // --- 2. MOCK FIREBASE CLASS (Single Source of Truth) ---
+        class MockFirestore {
+            constructor() {
+                this.groupId = "group_alpha";
+                this.load();
+            }
+
+            load() {
+                // Initialize default if empty
+                if (!localStorage.getItem('dora_members')) {
+                    const initialMembers = [
+                        { uid: 'u1', name: '哆啦A夢', role: 'admin', color: 'text-doraBlue', avatar: '🐱' },
+                        { uid: 'u2', name: '大雄', role: 'member', color: 'text-yellow-500', avatar: '🤓' },
+                        { uid: 'u3', name: '靜香', role: 'member', color: 'text-pink-500', avatar: '🛁' }
+                    ];
+                    localStorage.setItem('dora_members', JSON.stringify(initialMembers));
+                }
+                if (!localStorage.getItem('dora_expenses')) {
+                    localStorage.setItem('dora_expenses', JSON.stringify([]));
+                }
+                
+                this.members = JSON.parse(localStorage.getItem('dora_members'));
+                this.expenses = JSON.parse(localStorage.getItem('dora_expenses'));
+                this.currentUser = this.members[0]; // Default to Doraemon
+            }
+
+            saveExpenses() {
+                localStorage.setItem('dora_expenses', JSON.stringify(this.expenses));
+            }
+
+            addExpense(expense) {
+                // Immutable Fact Construction
+                const newExpense = {
+                    ...expense,
+                    id: expense.id || 'exp_' + Date.now() + Math.random().toString(36).substr(2, 5),
+                    baseCurrencyAmount: expense.amount * expense.appliedRate, // Base Currency Protection
+                    createdAt: expense.createdAt || new Date().toISOString(),
+                    syncStatus: 'synced', // Mocking instant sync
+                    deleted: false
+                };
+                
+                // Check dupes (for import logic)
+                const exists = this.expenses.find(e => e.id === newExpense.id);
+                if (!exists) {
+                    this.expenses.unshift(newExpense); // Add to top
+                    this.saveExpenses();
+                    return true;
+                }
+                return false;
+            }
+
+            softDelete(expenseId, uid) {
+                const idx = this.expenses.findIndex(e => e.id === expenseId);
+                if (idx !== -1) {
+                    this.expenses[idx].deleted = true;
+                    this.expenses[idx].deletedAt = new Date().toISOString();
+                    this.expenses[idx].deletedBy = uid;
+                    this.saveExpenses();
+                }
+            }
+
+            restore(expenseId) {
+                const idx = this.expenses.findIndex(e => e.id === expenseId);
+                if (idx !== -1) {
+                    this.expenses[idx].deleted = false;
+                    this.expenses[idx].deletedAt = null;
+                    this.expenses[idx].deletedBy = null;
+                    this.saveExpenses();
+                }
+            }
+
+            // Time Machine Logic: Re-calculate balances from Facts
+            rebuildBalances() {
+                const balances = {};
+                this.members.forEach(m => balances[m.uid] = 0);
+
+                this.expenses.forEach(exp => {
+                    if (exp.deleted) return;
+
+                    const payer = exp.payer;
+                    const amount = exp.baseCurrencyAmount; // ALWAYS use Base
+                    const shares = exp.shares; // {uid: weight}
+                    
+                    // Calc total weight
+                    let totalWeight = 0;
+                    for (let uid in shares) totalWeight += shares[uid];
+                    
+                    if (totalWeight === 0) return;
+
+                    // Payer + (User paid full amount initially)
+                    if (balances[payer] !== undefined) balances[payer] += amount;
+
+                    // Consumers - (Subtract their share)
+                    for (let uid in shares) {
+                        if (balances[uid] !== undefined) {
+                            const shareAmount = amount * (shares[uid] / totalWeight);
+                            balances[uid] -= shareAmount;
+                        }
+                    }
+                });
+                return balances;
+            }
+        }
+
+        // --- 3. APP LOGIC ---
+        const db = new MockFirestore();
+        
+        const app = {
+            state: {
+                selectedCategory: null, // Persistent
+                lastCurrency: 'JPY',
+                inputShares: {}, // {uid: weight}
+                currencyIndex: 0,
+            },
+
+            init() {
+                // Init Shares (Default all 1)
+                db.members.forEach(m => this.state.inputShares[m.uid] = 1);
+                
+                this.renderUI();
+                this.setupEventListeners();
+                this.updateCurrentUserDisplay();
+                
+                // Initialize Lucide Icons
+                lucide.createIcons();
+            },
+
+            updateCurrentUserDisplay() {
+                const el = document.getElementById('currentUserDisplay');
+                el.innerText = `${db.currentUser.name} (${db.currentUser.role === 'admin' ? 'Admin' : 'Member'})`;
+            },
+
+            renderUI() {
+                this.renderCategories();
+                this.renderShares();
+                this.renderRecentList();
+                this.renderWallet(); // Balances
+                this.renderMyPage();
+                this.renderHistory();
+                this.renderSettings();
+                lucide.createIcons();
+            },
+
+            // --- RENDERERS ---
+
+            renderCategories() {
+                const grid = document.getElementById('categoryGrid');
+                grid.innerHTML = CONSTANTS.CATEGORIES.map(cat => `
+                    <button class="category-btn aspect-square rounded-[1.2rem] flex flex-col items-center justify-center gap-1 transition-all ${this.state.selectedCategory === cat.key ? 'ring-4 ring-doraBlue/30 bg-white shadow-inner scale-95' : 'bg-white/40 hover:bg-white/70 shadow-sm'}"
+                        onclick="app.selectCategory('${cat.key}')">
+                        <div class="w-8 h-8 rounded-full ${cat.color} flex items-center justify-center text-slate-700">
+                            <i data-lucide="${cat.icon}" class="w-4 h-4"></i>
+                        </div>
+                        <span class="text-xs font-bold text-slate-500">${cat.name}</span>
+                    </button>
+                `).join('');
+            },
+
+            renderShares() {
+                const container = document.getElementById('sharesContainer');
+                container.innerHTML = db.members.map(m => {
+                    const weight = this.state.inputShares[m.uid] || 0;
+                    return `
+                    <button onclick="app.toggleShare('${m.uid}')" 
+                        class="px-3 py-1 rounded-full text-xs font-bold transition-all border flex items-center gap-1
+                        ${weight > 0 ? 'bg-doraBlue text-white border-doraBlue' : 'bg-transparent text-slate-400 border-slate-300'}">
+                        ${m.avatar} ${m.name} ${weight > 1 ? `<span class="bg-white/30 px-1 rounded text-[10px]">x${weight}</span>` : ''}
+                    </button>
+                `}).join('');
+            },
+
+            renderRecentList() {
+                const list = document.getElementById('recentList');
+                // Get active items, first 3
+                const recents = db.expenses.filter(e => !e.deleted).slice(0, 3);
+                
+                list.innerHTML = recents.map(exp => this.createExpenseRow(exp, false)).join('');
+            },
+
+            createExpenseRow(exp, showActions = false) {
+                const cat = CONSTANTS.CATEGORIES.find(c => c.key === exp.categoryKey) || CONSTANTS.CATEGORIES[7];
+                const payerName = db.members.find(m => m.uid === exp.payer)?.name || '未知';
+                const isMine = exp.payer === db.currentUser.uid;
+                
+                // Identify Group vs Personal
+                const shareCount = Object.keys(exp.shares).length;
+                const isGroup = shareCount > 1;
+                const typeTag = isGroup ? '<span class="text-[10px] bg-blue-100 text-blue-600 px-1 rounded">團體</span>' 
+                                        : '<span class="text-[10px] bg-slate-100 text-slate-500 px-1 rounded">私帳</span>';
+
+                const displayAmount = exp.currency === 'TWD' ? exp.amount : `${exp.currency} ${exp.amount}`;
+
+                return `
+                    <div class="glass-card rounded-[1.5rem] p-3 flex justify-between items-center group relative ${exp.deleted ? 'opacity-50 grayscale' : ''}">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full ${cat.color} flex items-center justify-center text-slate-700 shadow-sm">
+                                <i data-lucide="${cat.icon}" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                    ${exp.title}
+                                    ${exp.syncStatus === 'pending' ? '<i data-lucide="fan" class="animate-copter w-3 h-3 text-doraBlue"></i>' : ''}
+                                </div>
+                                <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                                    ${payerName} 付款 • ${typeTag}
+                                    ${exp.deleted ? '<span class="text-red-400 font-bold">(已刪除)</span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-doraBlue text-sm">${displayAmount}</div>
+                            <div class="text-[10px] text-slate-400">≈ NT$ ${Math.round(exp.baseCurrencyAmount)}</div>
+                        </div>
+
+                        ${showActions ? `
+                            <div class="absolute right-3 top-10 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                ${exp.deleted ? 
+                                    `<button onclick="app.restoreExpense('${exp.id}')" class="bg-green-100 p-1 rounded-full text-green-600"><i data-lucide="undo-2" class="w-4 h-4"></i></button>` :
+                                    `<button onclick="app.deleteExpense('${exp.id}')" class="bg-red-100 p-1 rounded-full text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`
+                                }
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            },
+
+            renderWallet() {
+                const balances = db.rebuildBalances();
+                const totalBase = db.expenses.reduce((acc, curr) => !curr.deleted ? acc + curr.baseCurrencyAmount : acc, 0);
+                
+                document.getElementById('walletTotalParams').innerText = `NT$ ${Math.round(totalBase).toLocaleString()}`;
+                
+                const container = document.getElementById('walletMemberBalances');
+                container.innerHTML = db.members.map(m => {
+                    const bal = balances[m.uid];
+                    const isPositive = bal >= 0;
+                    return `
+                        <div class="bg-white/40 rounded-[1.5rem] p-3 text-center border ${isPositive ? 'border-green-200' : 'border-red-200'}">
+                            <div class="text-xs text-slate-500 mb-1">${m.avatar} ${m.name}</div>
+                            <div class="font-bold ${isPositive ? 'text-green-600' : 'text-red-500'}">
+                                ${isPositive ? '+' : ''}${Math.round(bal)}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Simplify Settlement (Min Cash Flow - Naive Implementation for display)
+                this.renderSettlements(balances);
+            },
+
+            renderSettlements(balances) {
+                // A simplified logic for demo: Filter debtors and creditors
+                let creditors = [];
+                let debtors = [];
+                for (const [uid, amt] of Object.entries(balances)) {
+                    if (amt > 1) creditors.push({uid, amt});
+                    if (amt < -1) debtors.push({uid, amt});
+                }
+                
+                // Naive matching
+                let html = '';
+                if (debtors.length === 0) {
+                    html = '<div class="text-center text-xs text-slate-400 py-2">目前沒有需要結算的帳目</div>';
+                } else {
+                    // Just showing who owes who based on rough calc
+                    html = debtors.map(d => {
+                        const debtorName = db.members.find(m => m.uid === d.uid).name;
+                        return `
+                        <div class="glass-card px-4 py-3 rounded-full flex justify-between items-center">
+                            <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+                                <span class="text-red-400">${debtorName}</span>
+                                <i data-lucide="arrow-right" class="w-3 h-3 text-slate-300"></i>
+                                <span class="text-green-500">公基金</span>
+                            </div>
+                            <div class="font-bold text-slate-700 text-sm">NT$ ${Math.abs(Math.round(d.amt))}</div>
+                        </div>
+                    `}).join('');
+                }
+                document.getElementById('settlementList').innerHTML = html;
+            },
+
+            renderMyPage() {
+                const myUid = db.currentUser.uid;
+                document.getElementById('myPageName').innerText = db.currentUser.name;
+
+                // Dual Track Stats
+                let totalPaid = 0; // Outflow
+                let totalConsumed = 0; // Burden
+                
+                const catStats = {}; // { catKey: amount }
+
+                db.expenses.forEach(exp => {
+                    if (exp.deleted) return;
+                    
+                    // 1. Outflow
+                    if (exp.payer === myUid) {
+                        totalPaid += exp.baseCurrencyAmount;
+                    }
+
+                    // 2. Consumption
+                    const shares = exp.shares;
+                    const myWeight = shares[myUid] || 0;
+                    if (myWeight > 0) {
+                        let totalWeight = 0;
+                        for(let u in shares) totalWeight += shares[u];
+                        const myShareAmt = exp.baseCurrencyAmount * (myWeight / totalWeight);
+                        
+                        totalConsumed += myShareAmt;
+
+                        // Gadget Stats
+                        if (!catStats[exp.categoryKey]) catStats[exp.categoryKey] = 0;
+                        catStats[exp.categoryKey] += myShareAmt;
+                    }
+                });
+
+                // Update UI
+                document.getElementById('myBurdenAmount').innerText = Math.round(totalConsumed).toLocaleString();
+                document.getElementById('myPayerAmount').innerText = Math.round(totalPaid).toLocaleString();
+
+                // Achievement & Background Logic
+                let topCat = null;
+                let maxCatVal = 0;
+                for(let [k,v] of Object.entries(catStats)) {
+                    if(v > maxCatVal) { maxCatVal = v; topCat = k; }
+                }
+
+                let title = "冒險見習生";
+                if (topCat === 'food' && (maxCatVal / totalConsumed > 0.5)) title = "銅鑼燒美食家";
+                if (topCat === 'transport') title = "任意門達人";
+                if (topCat === 'shopping' && maxCatVal > 5000) title = "百寶袋大戶";
+
+                document.getElementById('myAchievement').innerText = title;
+
+                // Gadget Bars
+                const gadgetContainer = document.getElementById('gadgetList');
+                gadgetContainer.innerHTML = Object.entries(catStats)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([key, val]) => {
+                        const cat = CONSTANTS.CATEGORIES.find(c => c.key === key);
+                        const percent = (val / totalConsumed) * 100;
+                        return `
+                        <div class="mb-2">
+                            <div class="flex justify-between text-xs mb-1 px-1">
+                                <span class="font-bold text-slate-600 flex items-center gap-1">
+                                    <i data-lucide="${cat.icon}" class="w-3 h-3"></i> ${cat.name}
+                                </span>
+                                <span class="text-slate-400">NT$ ${Math.round(val)}</span>
+                            </div>
+                            <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full ${cat.color} rounded-full" style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('');
+            },
+
+            renderHistory() {
+                const list = document.getElementById('fullHistoryList');
+                const myUid = db.currentUser.uid;
+
+                // Privacy Filter Logic: Must be payer OR sharer
+                const visibleExpenses = db.expenses.filter(exp => {
+                    const isPayer = exp.payer === myUid;
+                    const isSharer = exp.shares[myUid] !== undefined;
+                    return isPayer || isSharer;
+                });
+
+                list.innerHTML = visibleExpenses.map(exp => this.createExpenseRow(exp, true)).join('');
+            },
+
+            renderSettings() {
+                document.getElementById('settingsMemberList').innerHTML = db.members.map(m => `
+                    <div class="flex justify-between items-center bg-white/40 px-3 py-2 rounded-full text-xs">
+                        <span class="font-bold text-slate-600">${m.avatar} ${m.name}</span>
+                        <span class="text-[10px] text-slate-400 border border-slate-200 px-2 rounded-full">${m.role}</span>
+                    </div>
+                `).join('');
+            },
+
+            // --- INTERACTIONS ---
+
+            selectCategory(key) {
+                this.state.selectedCategory = key;
+                this.renderCategories(); // refresh active state
+                lucide.createIcons();
+            },
+
+            toggleShare(uid) {
+                const current = this.state.inputShares[uid] || 0;
+                // Cycle: 0 -> 1 -> 2 -> 0 (Allow removing people)
+                let next = current + 1;
+                if (next > 2) next = 0;
+                this.state.inputShares[uid] = next;
+                this.renderShares();
+            },
+
+            cycleCurrency() {
+                this.state.currencyIndex = (this.state.currencyIndex + 1) % CONSTANTS.CURRENCIES.length;
+                this.state.lastCurrency = CONSTANTS.CURRENCIES[this.state.currencyIndex];
+                document.getElementById('btnCurrency').innerText = this.state.lastCurrency;
+            },
+
+            // --- CORE ACTIONS ---
+
+            async handleSubmit() {
+                const title = document.getElementById('inputTitle').value;
+                const amount = parseFloat(document.getElementById('inputAmount').value);
+                const rate = parseFloat(document.getElementById('inputRate').value);
+                
+                // Validation
+                if (!title || !amount) {
+                    alert('請輸入項目與金額！');
+                    return;
+                }
+                if (!this.state.selectedCategory) {
+                    alert('請選擇分類道具！');
+                    return;
+                }
+                
+                // Filter shares (remove 0 weights)
+                const finalShares = {};
+                let hasShare = false;
+                for(let [uid, w] of Object.entries(this.state.inputShares)) {
+                    if(w > 0) { finalShares[uid] = w; hasShare = true; }
+                }
+                if(!hasShare) { alert('至少要有一個人分攤！'); return; }
+
+                const expense = {
+                    title,
+                    amount,
+                    currency: this.state.lastCurrency,
+                    appliedRate: rate,
+                    categoryKey: this.state.selectedCategory,
+                    payer: db.currentUser.uid,
+                    shares: finalShares
+                };
+
+                // Save
+                db.addExpense(expense);
+                
+                // UI Refresh & Reset
+                this.renderUI();
+                
+                // Reset Fields (Keep Category & Rate)
+                document.getElementById('inputTitle').value = '';
+                document.getElementById('inputAmount').value = '';
+                document.getElementById('inputTitle').focus(); // Focus Flow
+                
+                // Animation Feedback (Bamboo Copter)
+                // In real PWA, wait for Service Worker. Here mock instant.
+            },
+
+            deleteExpense(id) {
+                if(confirm('確定要移除此道具紀錄嗎？(可還原)')) {
+                    db.softDelete(id, db.currentUser.uid);
+                    this.renderUI();
+                }
+            },
+
+            restoreExpense(id) {
+                db.restore(id);
+                this.renderUI();
+            },
+
+            rebuildBalances() {
+                const status = document.getElementById('rebuildStatus');
+                status.innerText = "時光機運作中... 重塑時間線...";
+                setTimeout(() => {
+                    db.rebuildBalances();
+                    this.renderUI();
+                    status.innerText = "時光機校正完畢！";
+                    setTimeout(() => status.innerText = "", 2000);
+                }, 1000);
+            },
+
+            // --- CSV EXPORT (Dual Logic) ---
+
+            exportLedgerCSV() {
+                // Human Readable
+                let csv = "\uFEFF日期,項目,分類,付款人,原幣金額,幣別,匯率,台幣(Base),分攤人,狀態\n";
+                db.expenses.forEach(e => {
+                    const date = new Date(e.createdAt).toLocaleDateString();
+                    const catName = CONSTANTS.CATEGORIES.find(c=>c.key===e.categoryKey)?.name || e.categoryKey;
+                    const payer = db.members.find(m=>m.uid===e.payer)?.name;
+                    const sharers = Object.keys(e.shares).map(uid => db.members.find(m=>m.uid===uid)?.name).join('/');
+                    const status = e.deleted ? "已刪除" : "正常";
+                    
+                    csv += `${date},${e.title},${catName},${payer},${e.amount},${e.currency},${e.appliedRate},${Math.round(e.baseCurrencyAmount)},${sharers},${status}\n`;
+                });
+                this.downloadCSV(csv, `DoraLedger_Human_${new Date().toISOString().split('T')[0]}.csv`);
+            },
+
+            exportBackupCSV() {
+                // Machine Readable (Raw JSON dumps for critical fields)
+                let csv = "\uFEFFexpenseId,createdAt,title,amount,baseAmount,currency,rate,payerUid,categoryKey,sharesJson,deleted,deletedAt\n";
+                db.expenses.forEach(e => {
+                    // Escape quotes in JSON
+                    const sharesJson = JSON.stringify(e.shares).replace(/"/g, '""');
+                    csv += `${e.id},${e.createdAt},${e.title},${e.amount},${e.baseCurrencyAmount},${e.currency},${e.appliedRate},${e.payer},${e.categoryKey},"${sharesJson}",${e.deleted},${e.deletedAt||''}\n`;
+                });
+                this.downloadCSV(csv, `DoraLedger_BACKUP_${new Date().toISOString().split('T')[0]}.csv`);
+            },
+
+            downloadCSV(content, filename) {
+                const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.setAttribute("download", filename);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+
+            setupEventListeners() {
+                // Currency Toggle
+                document.getElementById('btnCurrency').addEventListener('click', () => this.cycleCurrency());
+                
+                // Submit
+                document.getElementById('btnSubmit').addEventListener('click', () => this.handleSubmit());
+                
+                // Enter Key Flow
+                document.getElementById('inputTitle').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') document.getElementById('inputAmount').focus();
+                });
+                document.getElementById('inputAmount').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleSubmit();
+                });
+
+                // Toggle Advanced
+                document.getElementById('toggleAdvanced').addEventListener('click', () => {
+                    document.getElementById('advancedPanel').classList.toggle('hidden');
+                });
+
+                // Tab Navigation
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        // UI Toggle
+                        document.querySelectorAll('.nav-btn').forEach(b => {
+                            b.classList.remove('active-tab-icon', 'text-doraBlue');
+                            b.classList.add('text-slate-400');
+                        });
+                        e.currentTarget.classList.remove('text-slate-400');
+                        e.currentTarget.classList.add('active-tab-icon', 'text-doraBlue');
+
+                        // Page Switch
+                        const targetId = e.currentTarget.dataset.target;
+                        document.querySelectorAll('main').forEach(page => page.classList.add('hidden'));
+                        document.getElementById(targetId).classList.remove('hidden');
+
+                        // Re-render icons for the new page
+                        lucide.createIcons();
+                    });
+                });
+                
+                // Import Handler (Simple Merge Logic)
+                document.getElementById('importFile').addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if(!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const text = event.target.result;
+                        const lines = text.split('\n');
+                        let count = 0;
+                        // Skip header, start loop
+                        for(let i=1; i<lines.length; i++) {
+                            if(!lines[i].trim()) continue;
+                            // Very basic CSV parser (splitting by comma, assuming no commas in title for this demo)
+                            // In production, use a regex parser library
+                            const cols = lines[i].split(',');
+                            if(cols.length < 5) continue; 
+                            
+                            // Check if Machine CSV (has expenseId in col 0)
+                            // Naive check: id usually has 'exp_'
+                            if(cols[0].includes('exp_')) {
+                                // Construct obj mock
+                                const sharesRaw = lines[i].match(/"({.*?})"/); // Extract JSON part
+                                const shares = sharesRaw ? JSON.parse(sharesRaw[1].replace(/""/g, '"')) : {};
+                                
+                                const exp = {
+                                    id: cols[0],
+                                    createdAt: cols[1],
+                                    title: cols[2],
+                                    amount: parseFloat(cols[3]),
+                                    baseCurrencyAmount: parseFloat(cols[4]),
+                                    currency: cols[5],
+                                    appliedRate: parseFloat(cols[6]),
+                                    payer: cols[7],
+                                    categoryKey: cols[8],
+                                    shares: shares,
+                                    deleted: cols[10] === 'true'
+                                };
+                                if(db.addExpense(exp)) count++;
+                            }
+                        }
+                        alert(`成功合併 ${count} 筆時光記憶！`);
+                        this.renderUI();
+                    };
+                    reader.readAsText(file);
+                });
+            }
+        };
+
+        // Start App
+        app.init();
+
+    </script>
+</body>
+</html>
